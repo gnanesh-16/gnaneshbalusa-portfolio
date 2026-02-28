@@ -4,9 +4,10 @@ import { Icons } from './Icons';
 
 interface HeaderProps {
     onAboutClick?: () => void;
+    onNavClick?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
+export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeProfile, setActiveProfile] = useState('');
 
@@ -14,6 +15,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
 
     const scrollToSection = (id: string) => {
         setMobileMenuOpen(false);
+        onNavClick?.(); // Close resume if open
         if (id === 'about') {
             onAboutClick?.();
             lenis?.scrollTo('#about', { offset: -50 });

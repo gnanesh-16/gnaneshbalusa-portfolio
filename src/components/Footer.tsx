@@ -36,11 +36,16 @@ const TermsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
     </div>
 );
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+    onNavClick?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavClick }) => {
     const [showPrivacy, setShowPrivacy] = useState(false);
     const [showTerms, setShowTerms] = useState(false);
 
     const scrollToSection = (id: string) => {
+        onNavClick?.(); // Close resume if open
         const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
