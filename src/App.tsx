@@ -19,7 +19,13 @@ const App: React.FC = () => {
 
     return (
         <ThemeProvider>
-            <ReactLenis root>
+            <ReactLenis root options={{
+                lerp: 0.1,
+                duration: 1.5,
+                wheelMultiplier: 1,
+                touchMultiplier: 2,
+                infinite: false,
+            }}>
                 <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#131313] text-[#1a1a1a] dark:text-white font-[Manrope] transition-colors duration-300">
                     <Header onAboutClick={handleAboutClick} onNavClick={() => setIsResumeOpen(false)} />
 

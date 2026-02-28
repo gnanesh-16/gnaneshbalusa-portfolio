@@ -186,7 +186,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
             {/* About Hero Section */}
             <section
                 id="about"
-                className={`${showAboutHeroDesktop ? 'block' : 'md:hidden'} py-32 border-t border-[#e5e5e5] dark:border-zinc-800`}
+                className={`${showAboutHeroDesktop ? 'block' : 'md:hidden'} pt-2 pb-32 md:py-32 border-t border-[#e5e5e5] dark:border-zinc-800`}
             >
                 <div className="max-w-[1200px] mx-auto px-6">
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-12">
