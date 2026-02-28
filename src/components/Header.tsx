@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
                 </div>
 
                 {/* Desktop Nav */}
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-8 justify-center w-full">
                     <nav className="hidden md:flex items-center gap-6 text-[15px] font-medium text-[#5f5f5f] dark:text-[#a0a0a0]">
                         {[
                             { label: 'About', id: 'about' },

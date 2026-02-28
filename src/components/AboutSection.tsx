@@ -179,7 +179,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                             <div className="relative group cursor-pointer">
                                 <div className="relative w-full aspect-square max-w-[380px] overflow-hidden rounded-lg">
                                     <img
-                                        src="/brand-assets/gnaneshbalusaprofileamazon_webp.webp"
+                                        src="/brand-assets/portfolio-gnaneshbalusa-amazon.jpg"
                                         alt="Gnanesh Balusa"
                                         className="w-full h-[130%] object-cover object-[center_15%] grayscale group-hover:grayscale-0 transition-all duration-500"
                                         loading="eager"

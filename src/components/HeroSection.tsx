@@ -48,7 +48,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onAboutClick }) => {
                 <div className="relative group cursor-pointer w-full max-w-[500px]">
                     <div className="relative w-full aspect-square overflow-hidden rounded-lg">
                         <img
-                            src="/brand-assets/gnaneshbalusaprofileamazon_webp.webp"
+                            src="/brand-assets/portfolio-gnaneshbalusa-amazon.jpg"
                             alt="Gnanesh Balusa"
                             className="w-full h-[130%] object-cover object-[center_15%] grayscale group-hover:grayscale-0 transition-all duration-500"
                             loading="eager"
