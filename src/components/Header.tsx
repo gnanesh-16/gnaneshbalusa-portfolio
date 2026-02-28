@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
 import { Icons } from './Icons';
 
 export const Header: React.FC = () => {
-    const { theme, setTheme } = useTheme();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const scrollToSection = (id: string) => {
@@ -12,12 +10,6 @@ export const Header: React.FC = () => {
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
         }
-    };
-
-    const cycleTheme = () => {
-        if (theme === 'light') setTheme('dark');
-        else if (theme === 'dark') setTheme('system');
-        else setTheme('light');
     };
 
     return (
@@ -50,15 +42,6 @@ export const Header: React.FC = () => {
                             </button>
                         ))}
                     </nav>
-
-                    {/* Theme Toggle */}
-                    <button
-                        onClick={cycleTheme}
-                        className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-                        title={`Theme: ${theme}`}
-                    >
-                        {theme === 'dark' ? <Icons.Moon className="w-4 h-4 text-[#a0a0a0]" /> : <Icons.Sun className="w-4 h-4 text-[#5f5f5f]" />}
-                    </button>
 
                     {/* Mobile Menu Button */}
                     <button

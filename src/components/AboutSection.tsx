@@ -56,24 +56,28 @@ export const AboutSection: React.FC = () => {
     const experiences = [
         {
             company: 'Amazon',
+            logo: '/brand-assets/amazonlogo-.png',
             period: '2025 -',
             role: 'DS Machine Learning Associate 2',
             description: 'Building AI-powered solutions that translate complex data into measurable business outcomes. My work centers on developing systems that remain robust at scale while preserving the nuance required for real-world deployment.'
         },
         {
             company: 'McKinsey & Company',
+            logo: '/brand-assets/mcksiney&coampnt-logo.png',
             period: '2024 - 2025',
             role: 'Business Analyst',
             description: 'Guided cross-functional teams through data analysis initiatives that reshaped how the organization captures and interprets information. Applied structured problem-solving frameworks to inform executive strategy.'
         },
         {
             company: 'TiHAN IIT Hyderabad',
+            logo: '/brand-assets/iith-logo.png',
             period: '2024 - 2024',
             role: 'AI Research Software Engineer',
             description: 'Designed and implemented AI/ML systems with an emphasis on production readiness. Balanced research ambition with engineering pragmatism to deliver solutions that meet demanding performance requirements.'
         },
         {
             company: 'Microsoft',
+            logo: '/brand-assets/microsoftlogo.png',
             period: '2024 - 2024',
             role: 'Microsoft Student Ambassador',
             description: 'Led community initiatives that brought emerging technologies to peers through hands-on workshops and collaborative projects. Fostered an environment where curiosity and technical rigor could coexist.'
@@ -236,7 +240,14 @@ export const AboutSection: React.FC = () => {
                                 <div className="text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase">
                                     {exp.period}
                                 </div>
-                                <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0]">{exp.company}</h3>
+                                <div className="flex items-center gap-3">
+                                    <img
+                                        src={exp.logo}
+                                        alt={`${exp.company} logo`}
+                                        className={`${exp.company === 'Microsoft' ? 'w-8 h-8' : 'w-12 h-12'} rounded-md object-contain`}
+                                    />
+                                    <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0]">{exp.company}</h3>
+                                </div>
                                 <div className="text-sm font-medium text-[#444] dark:text-[#b0b0b0]">{exp.role}</div>
                                 <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
                                     {exp.description}

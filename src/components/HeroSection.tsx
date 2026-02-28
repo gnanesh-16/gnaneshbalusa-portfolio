@@ -10,7 +10,7 @@ export const HeroSection: React.FC = () => {
     };
 
     return (
-        <section id="hero" className="px-6 pt-32 pb-32 max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <section id="hero" className="hidden md:grid px-6 pt-32 pb-32 max-w-[1200px] mx-auto grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
                 {/* Headline */}
                 <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-[#1a1a1a] dark:text-[#f0f0f0] leading-[1.05]">
@@ -19,7 +19,7 @@ export const HeroSection: React.FC = () => {
                     understand.
                 </h1>
                 <p className="text-base md:text-lg text-[#4a4a4a] dark:text-[#a0a0a0] max-w-md leading-relaxed font-medium">
-                    Machine Learning Data Scientist at Amazon. I build AI systems that understand, adapt, and scale — from research to real-world deployment.
+                            Machine Learning Engineer 2 at Amazon. I build AI systems that understand, adapt, and scale from research to real world production deployment.
                 </p>
                 <div className="pt-4 flex gap-4">
                     <button
