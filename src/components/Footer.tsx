@@ -6,7 +6,7 @@ const PrivacyModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
         <div className="bg-white dark:bg-[#1E1E1E] rounded-xl max-w-lg w-full mx-4 p-8 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h2 className="text-2xl font-bold mb-4 text-[#1a1a1a] dark:text-[#f0f0f0]">Privacy Policy</h2>
             <p className="text-sm text-[#555] dark:text-[#a0a0a0] leading-relaxed mb-4">
-                This portfolio website does not collect, store, or process any personal data. No cookies are used for tracking purposes. 
+                This portfolio website does not collect, store, or process any personal data. No cookies are used for tracking purposes.
                 Theme preferences are stored locally in your browser's localStorage and never transmitted to any server.
             </p>
             <p className="text-sm text-[#555] dark:text-[#a0a0a0] leading-relaxed mb-6">
@@ -55,11 +55,11 @@ export const Footer: React.FC = () => {
             <footer className="bg-[#f5f5f5] dark:bg-[#131313] text-[#1a1a1a] dark:text-[#a0a0a0] pt-16 pb-10 px-6 border-t border-[#e5e5e5] dark:border-zinc-800">
                 <div className="max-w-[1200px] mx-auto">
                     {/* Top Row - Logo & Links */}
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-12">
-                        <div className="text-lg font-bold tracking-tight dark:text-[#f0f0f0]">Gnanesh Balusa</div>
+                    <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-8 mb-12">
+                        <div className="text-2xl md:text-lg font-bold tracking-tight text-[#1a1a1a] dark:text-[#f0f0f0]">Gnanesh Balusa</div>
 
                         {/* Footer Links */}
-                        <div className="flex items-center gap-8 text-sm font-medium text-[#555] dark:text-[#b0b0b0]">
+                        <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 md:gap-8 text-sm md:text-sm font-medium text-[#555] dark:text-[#b0b0b0]">
                             <button onClick={() => scrollToSection('about')} className="hover:text-[#1a1a1a] dark:hover:text-white transition-colors">
                                 About
                             </button>
@@ -75,7 +75,7 @@ export const Footer: React.FC = () => {
                         </div>
 
                         {/* Social Icons */}
-                        <div className="flex gap-4">
+                        <div className="flex flex-wrap justify-center gap-6 md:gap-4 mt-2 md:mt-0">
                             <a href="https://x.com/Gnaneshbalusa" target="_blank" rel="noopener noreferrer" title="X (Twitter)">
                                 <Icons.Twitter className="w-5 h-5 text-[#555] dark:text-[#b0b0b0] hover:text-[#1a1a1a] dark:hover:text-white cursor-pointer transition-colors" />
                             </a>
@@ -98,9 +98,9 @@ export const Footer: React.FC = () => {
                     </div>
 
                     {/* Bottom Row - Copyright & Legal */}
-                    <div className="pt-8 border-t border-[#e5e5e5] dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#666] dark:text-[#999] font-medium">
+                    <div className="pt-8 border-t border-[#e5e5e5] dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 text-xs text-[#666] dark:text-[#999] font-medium text-center md:text-left">
                         <div>&copy; {new Date().getFullYear()} Gnanesh Balusa. All rights reserved.</div>
-                        <div className="flex gap-6">
+                        <div className="flex flex-wrap justify-center gap-6">
                             <button onClick={() => setShowPrivacy(true)} className="hover:text-[#1a1a1a] dark:hover:text-[#a0a0a0] cursor-pointer transition-colors">
                                 Privacy Policy
                             </button>

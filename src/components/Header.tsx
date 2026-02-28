@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLenis } from 'lenis/react';
 import { Icons } from './Icons';
 
 interface HeaderProps {
@@ -9,15 +10,20 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeProfile, setActiveProfile] = useState('');
 
+    const lenis = useLenis();
+
     const scrollToSection = (id: string) => {
         setMobileMenuOpen(false);
         if (id === 'about') {
             onAboutClick?.();
+            lenis?.scrollTo('#about', { offset: -50 });
             return;
         }
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
+
+        if (id === 'hero') {
+            lenis?.scrollTo(0);
+        } else {
+            lenis?.scrollTo(`#${id}`, { offset: -50 });
         }
     };
 

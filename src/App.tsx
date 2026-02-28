@@ -4,19 +4,15 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
+import { ScrollButton } from './components/ScrollButton';
 import { ReactLenis } from 'lenis/react';
 
 const App: React.FC = () => {
     const [showAboutDesktop, setShowAboutDesktop] = useState(false);
 
     const handleAboutClick = () => {
+        // Native scroll removed, handled via Lenis in Header.tsx
         setShowAboutDesktop(true);
-        requestAnimationFrame(() => {
-            const element = document.getElementById('about');
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
-            }
-        });
     };
 
     return (
@@ -30,6 +26,7 @@ const App: React.FC = () => {
                         <AboutSection showAboutHeroDesktop={showAboutDesktop} />
                         <Footer />
                     </main>
+                    <ScrollButton />
                 </div>
             </ReactLenis>
         </ThemeProvider>

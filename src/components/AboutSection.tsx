@@ -179,15 +179,21 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                             <div className="relative group cursor-pointer">
                                 <div className="relative w-full aspect-square max-w-[380px] overflow-hidden rounded-lg">
                                     {/* Desktop image */}
-                                    <img
-                                        src="/brand-assets/gnaneshbalusaprofileamazon_webp.webp"
-                                        alt="Gnanesh Balusa"
-                                        className="hidden md:block w-full h-[130%] object-cover object-[center_15%]"
-                                        loading="eager"
-                                        decoding="async"
-                                        width="380"
-                                        height="494"
-                                    />
+                                    <div className="relative hidden md:block w-full h-[130%]">
+                                        <img
+                                            src="/brand-assets/gnaneshbalusaprofileamazon_webp.webp"
+                                            alt="Gnanesh Balusa"
+                                            className="w-full h-full object-cover object-[center_15%]"
+                                            loading="eager"
+                                            decoding="async"
+                                            width="380"
+                                            height="494"
+                                        />
+                                        {/* CSS Grain Overlay */}
+                                        <div className="absolute inset-0 bg-grain opacity-[0.14] mix-blend-overlay pointer-events-none rounded-lg"></div>
+                                        {/* Optional dark tint if requested for contrast */}
+                                        <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none rounded-lg"></div>
+                                    </div>
                                     {/* Mobile image - no overlay, no hover style */}
                                     <img
                                         src="/brand-assets/portfolio-gnaneshbalusa-amazon.jpg"
