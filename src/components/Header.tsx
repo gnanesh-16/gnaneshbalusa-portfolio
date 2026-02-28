@@ -7,6 +7,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [activeProfile, setActiveProfile] = useState('');
 
     const scrollToSection = (id: string) => {
         setMobileMenuOpen(false);
@@ -75,12 +76,16 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
                         {mobileMenuOpen && (
                             <div className="absolute right-0 mt-2 w-80 rounded-lg shadow-lg border border-[#e5e5e5] dark:border-zinc-800 p-4 z-50 bg-[#131313]">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <Icons.GitHub className="w-6 h-6 text-[#f0f0f0]" />
-                                    <span className="font-medium text-[#f0f0f0]">gnanesh-16</span>
+                                    <button className="flex items-center gap-2" onClick={() => setActiveProfile('github')}>
+                                        <Icons.GitHub className="w-6 h-6 text-[#f0f0f0]" />
+                                        <span className="font-medium text-[#f0f0f0]">gnanesh-16</span>
+                                    </button>
                                 </div>
                                 <div className="flex items-center gap-2 mb-4">
-                                    <Icons.LinkedIn className="w-6 h-6 text-[#f0f0f0]" />
-                                    <span className="font-medium text-[#f0f0f0]">gnaneshbalusa</span>
+                                    <button className="flex items-center gap-2" onClick={() => setActiveProfile('linkedin')}>
+                                        <Icons.LinkedIn className="w-6 h-6 text-[#f0f0f0]" />
+                                        <span className="font-medium text-[#f0f0f0]">gnaneshbalusa</span>
+                                    </button>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <input
@@ -103,6 +108,24 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
             </header>
             {/* Mobile Menu */}
             {/* Mobile menu navigation removed as requested */}
+            {/* Modal for blurred background and link preview */}
+            {/* Show profile info directly in dropdown for mobile */}
+            {activeProfile === 'github' && (
+                <div className="w-full bg-[#131313] rounded-xl p-4 mt-4 flex flex-col items-center justify-center">
+                    <Icons.GitHub className="w-10 h-10 text-[#f0f0f0] mb-2" />
+                    <span className="font-medium text-[#f0f0f0] text-base mb-2">gnanesh-16</span>
+                    <p className="text-[#f0f0f0] text-sm mb-2">GitHub profile shown here.</p>
+                    <button className="mt-2 text-[#f0f0f0] underline text-sm w-full text-center" onClick={() => setActiveProfile('')}>Close</button>
+                </div>
+            )}
+            {activeProfile === 'linkedin' && (
+                <div className="w-full bg-[#131313] rounded-xl p-4 mt-4 flex flex-col items-center justify-center">
+                    <Icons.LinkedIn className="w-10 h-10 text-[#f0f0f0] mb-2" />
+                    <span className="font-medium text-[#f0f0f0] text-base mb-2">gnaneshbalusa</span>
+                    <p className="text-[#f0f0f0] text-sm mb-2">LinkedIn profile shown here.</p>
+                    <button className="mt-2 text-[#f0f0f0] underline text-sm w-full text-center" onClick={() => setActiveProfile('')}>Close</button>
+                </div>
+            )}
         </div>
     );
 };
