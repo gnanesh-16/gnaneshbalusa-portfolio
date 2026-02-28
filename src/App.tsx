@@ -29,7 +29,7 @@ const App: React.FC = () => {
                         ) : (
                             <>
                                 <HeroSection onAboutClick={handleAboutClick} onResumeClick={() => setIsResumeOpen(true)} />
-                                <AboutSection showAboutHeroDesktop={showAboutDesktop} />
+                                <AboutSection showAboutHeroDesktop={showAboutDesktop} onResumeClick={() => setIsResumeOpen(true)} />
                             </>
                         )}
                         <Footer onNavClick={() => setIsResumeOpen(false)} />

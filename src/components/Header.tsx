@@ -10,6 +10,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeProfile, setActiveProfile] = useState('');
+    const [message, setMessage] = useState('');
+    const [isSent, setIsSent] = useState(false);
 
     const lenis = useLenis();
 
@@ -82,33 +84,99 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
                             <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </button>
                         {mobileMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-80 rounded-lg shadow-lg border border-[#e5e5e5] dark:border-zinc-800 p-4 z-50 bg-[#131313]">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <button className="flex items-center gap-2" onClick={() => setActiveProfile('github')}>
-                                        <Icons.GitHub className="w-6 h-6 text-[#f0f0f0]" />
-                                        <span className="font-medium text-[#f0f0f0]">gnanesh-16</span>
-                                    </button>
-                                </div>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <button className="flex items-center gap-2" onClick={() => setActiveProfile('linkedin')}>
-                                        <Icons.LinkedIn className="w-6 h-6 text-[#f0f0f0]" />
-                                        <span className="font-medium text-[#f0f0f0]">gnaneshbalusa</span>
-                                    </button>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Type here..."
-                                        className="flex-1 px-2 py-1 rounded border border-[#e5e5e5] dark:border-zinc-800 bg-[#191919] text-[#f0f0f0]"
-                                    />
-                                    <button className="p-2 rounded bg-[#191919] hover:bg-[#111] transition-colors">
-                                        <svg width="12" height="12" fill="none" stroke="#f0f0f0" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                            <path d="M22 2L11 13" />
-                                            <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-                                            <circle cx="19" cy="5" r="1" fill="#f0f0f0" />
-                                        </svg>
-                                    </button>
-                                </div>
+                            <div className="absolute right-0 mt-2 w-80 rounded-lg shadow-lg border border-[#e5e5e5] dark:border-zinc-800 p-4 z-50 bg-[#131313] animate-in fade-in zoom-in-95 duration-200">
+                                {!activeProfile ? (
+                                    <>
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <button
+                                                className="flex items-center justify-between w-full p-2 hover:bg-white/5 rounded-lg transition-colors"
+                                                onClick={() => setActiveProfile('github')}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <Icons.GitHub className="w-6 h-6 text-[#f0f0f0]" />
+                                                    <span className="font-medium text-[#f0f0f0]">GitHub</span>
+                                                </div>
+                                                <Icons.ChevronDown className="w-4 h-4 text-zinc-500 -rotate-90" />
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                className="flex items-center justify-between w-full p-2 hover:bg-white/5 rounded-lg transition-colors"
+                                                onClick={() => setActiveProfile('linkedin')}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <Icons.LinkedIn className="w-6 h-6 text-[#f0f0f0]" />
+                                                    <span className="font-medium text-[#f0f0f0]">LinkedIn</span>
+                                                </div>
+                                                <Icons.ChevronDown className="w-4 h-4 text-zinc-500 -rotate-90" />
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="space-y-4 animate-in slide-in-from-right-2 duration-300">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                {activeProfile === 'github' ? <Icons.GitHub className="w-4 h-4 text-zinc-400" /> : <Icons.LinkedIn className="w-4 h-4 text-zinc-400" />}
+                                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{activeProfile}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <a
+                                                    href={activeProfile === 'github' ? "https://github.com/gnanesh-16" : "https://in.linkedin.com/in/gnaneshbalusa"}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-[10px] text-zinc-500 hover:text-white transition-colors underline underline-offset-2"
+                                                >
+                                                    Click here to redirect to {activeProfile === 'github' ? 'GitHub' : 'LinkedIn'}
+                                                </a>
+                                                <button onClick={() => setActiveProfile('')} className="text-zinc-500 hover:text-white transition-colors">
+                                                    <Icons.X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {!isSent ? (
+                                            <>
+                                                <textarea
+                                                    maxLength={200}
+                                                    value={message}
+                                                    onChange={(e) => setMessage(e.target.value)}
+                                                    placeholder="Type your message..."
+                                                    className="w-full h-24 px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800/50 text-[#f0f0f0] text-sm focus:outline-none focus:border-white/20 resize-none transition-colors"
+                                                />
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] text-zinc-500 font-bold uppercase">{message.length}/200</span>
+                                                    <button
+                                                        disabled={!message.trim()}
+                                                        onClick={() => {
+                                                            setIsSent(true);
+
+                                                            setTimeout(() => {
+                                                                setMobileMenuOpen(false);
+                                                                setIsSent(false);
+                                                                setActiveProfile('');
+                                                                setMessage('');
+                                                            }, 3000);
+                                                        }}
+                                                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                                                    >
+                                                        <Icons.Send className="w-3 h-3" />
+                                                        Send
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="py-8 text-center animate-in fade-in zoom-in-95 duration-500">
+                                                <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <Icons.Sun className="w-6 h-6 text-green-500" />
+                                                </div>
+                                                <h3 className="text-white font-bold text-sm mb-1">Message Sent</h3>
+                                                <p className="text-zinc-400 text-[11px] leading-relaxed">
+                                                    I'll get back to you within <span className="text-white font-bold">27 minutes</span> exactly.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -117,23 +185,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
             {/* Mobile Menu */}
             {/* Mobile menu navigation removed as requested */}
             {/* Modal for blurred background and link preview */}
-            {/* Show profile info directly in dropdown for mobile */}
-            {activeProfile === 'github' && (
-                <div className="w-full bg-[#131313] rounded-xl p-4 mt-4 flex flex-col items-center justify-center">
-                    <Icons.GitHub className="w-10 h-10 text-[#f0f0f0] mb-2" />
-                    <span className="font-medium text-[#f0f0f0] text-base mb-2">gnanesh-16</span>
-                    <p className="text-[#f0f0f0] text-sm mb-2">GitHub profile shown here.</p>
-                    <button className="mt-2 text-[#f0f0f0] underline text-sm w-full text-center" onClick={() => setActiveProfile('')}>Close</button>
-                </div>
-            )}
-            {activeProfile === 'linkedin' && (
-                <div className="w-full bg-[#131313] rounded-xl p-4 mt-4 flex flex-col items-center justify-center">
-                    <Icons.LinkedIn className="w-10 h-10 text-[#f0f0f0] mb-2" />
-                    <span className="font-medium text-[#f0f0f0] text-base mb-2">gnaneshbalusa</span>
-                    <p className="text-[#f0f0f0] text-sm mb-2">LinkedIn profile shown here.</p>
-                    <button className="mt-2 text-[#f0f0f0] underline text-sm w-full text-center" onClick={() => setActiveProfile('')}>Close</button>
-                </div>
-            )}
+
         </div>
     );
 };

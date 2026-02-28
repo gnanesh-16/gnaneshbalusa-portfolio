@@ -33,10 +33,8 @@ export const ScrollButton: React.FC = () => {
 
     const handleClick = () => {
         if (isAtTop) {
-            // Scroll to bottom
             lenis?.scrollTo('bottom');
         } else {
-            // Scroll to top
             lenis?.scrollTo(0);
         }
     };

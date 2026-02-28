@@ -2,6 +2,7 @@ import React from 'react';
 
 interface AboutSectionProps {
     showAboutHeroDesktop?: boolean;
+    onResumeClick?: () => void;
 }
 
 // Custom SVG Icons for Projects
@@ -56,7 +57,22 @@ const ProjectIcons = {
     )
 };
 
-export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop = true }) => {
+export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop = true, onResumeClick }) => {
+    const handleResumeClick = () => {
+        // Direct download link from Google Drive
+        const downloadUrl = "https://drive.google.com/uc?export=download&id=16AKWcSpsPhDa2G9kIBxZ-Wb_2E7eYnB8";
+
+        // Trigger download
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.setAttribute('download', 'Gnanesh_Balusa_Resume.pdf');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Open modal/viewer
+        onResumeClick?.();
+    };
     const experiences = [
         {
             company: 'Amazon',
@@ -177,7 +193,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                         {/* Profile Image - Left */}
                         <div className="md:w-[45%]">
                             <div className="relative group cursor-pointer">
-                                <div className="relative w-full aspect-square max-w-[380px] overflow-hidden rounded-lg">
+                                <div className="relative w-full aspect-[4/5] md:aspect-square max-w-[380px] overflow-hidden rounded-lg">
                                     {/* Desktop image */}
                                     <div className="relative hidden md:block w-full h-[130%]">
                                         <img
@@ -194,19 +210,31 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                                         {/* Optional dark tint if requested for contrast */}
                                         <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none rounded-lg"></div>
                                     </div>
-                                    {/* Mobile image - no overlay, no hover style */}
+                                    {/* Mobile image - taller aspect ratio to show more of the photo (zoom out) */}
                                     <img
                                         src="/brand-assets/portfolio-gnaneshbalusa-amazon.jpg"
                                         alt="Gnanesh Balusa"
-                                        className="md:hidden w-full h-[130%] object-cover object-[center_15%]"
+                                        className="md:hidden w-full h-full object-cover object-[center_5%]"
                                         loading="eager"
                                         decoding="async"
                                         width="380"
-                                        height="494"
+                                        height="475"
                                     />
                                 </div>
-                                <div className="mt-4 text-sm text-[#666] dark:text-[#999] font-medium">
-                                    Gnanesh Balusa
+
+                                {/* Mobile UI: Name + Resume Button (Side-by-side on mobile) */}
+                                <div className="mt-5 flex items-center justify-between w-full max-w-[380px]">
+                                    <div className="text-sm text-[#444] dark:text-[#a0a0a0] font-bold tracking-tight uppercase">
+                                        Gnanesh Balusa
+                                    </div>
+                                    <div className="md:hidden">
+                                        <button
+                                            onClick={handleResumeClick}
+                                            className="px-5 py-2.5 bg-[#1a1a1a] dark:bg-[#f0f0f0] text-white dark:text-black rounded-full font-bold hover:opacity-90 transition-all text-[11px] uppercase tracking-wider shadow-md"
+                                        >
+                                            Resume
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
