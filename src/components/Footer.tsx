@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icons } from './Icons';
 
 const PrivacyModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
@@ -43,6 +44,28 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ onNavClick }) => {
     const [showPrivacy, setShowPrivacy] = useState(false);
     const [showTerms, setShowTerms] = useState(false);
+
+    // Easter Egg State
+    const [clickCount, setClickCount] = useState(0);
+    const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const navigate = useNavigate();
+
+    const handleCopyrightClick = () => {
+        setClickCount((prev) => {
+            const newCount = prev + 1;
+            if (newCount >= 8) {
+                navigate('/dashboard/login');
+                return 0; // Reset after navigation
+            }
+            return newCount;
+        });
+
+        // Reset the counter if they stop clicking after a while
+        if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = setTimeout(() => {
+            setClickCount(0);
+        }, 3000); // 3 seconds to complete the 8 clicks
+    };
 
     const scrollToSection = (id: string) => {
         onNavClick?.(); // Close resume if open
@@ -104,7 +127,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavClick }) => {
 
                     {/* Bottom Row - Copyright & Legal */}
                     <div className="pt-8 border-t border-[#e5e5e5] dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 text-xs text-[#666] dark:text-[#999] font-medium text-center md:text-left">
-                        <div>&copy; {new Date().getFullYear()} Gnanesh Balusa. All rights reserved.</div>
+                        <div>
+                            <span
+                                onClick={handleCopyrightClick}
+                                className="cursor-pointer select-none"
+                                title="Copyright"
+                            >
+                                &copy;
+                            </span>
+                            {' '}{new Date().getFullYear()} Gnanesh Balusa. All rights reserved.
+                        </div>
                         <div className="flex flex-wrap justify-center gap-6">
                             <button onClick={() => setShowPrivacy(true)} className="hover:text-[#1a1a1a] dark:hover:text-[#a0a0a0] cursor-pointer transition-colors">
                                 Privacy Policy

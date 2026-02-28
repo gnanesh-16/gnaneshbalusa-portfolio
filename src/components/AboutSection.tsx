@@ -1,4 +1,6 @@
 import React from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 
 interface AboutSectionProps {
     showAboutHeroDesktop?: boolean;
@@ -68,7 +70,16 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
         // Open the internal resume viewer
         onResumeClick?.();
     };
-    const experiences = [
+
+    // Live Data Queries
+    const liveExperiences = useQuery(api.portfolio.getExperiences);
+    const liveWritings = useQuery(api.portfolio.getWritings);
+    const liveProjects = useQuery(api.portfolio.getProjects);
+    const livePatents = useQuery(api.portfolio.getPatents);
+    const livePublications = useQuery(api.portfolio.getPublications);
+
+    // Fallbacks while loading or if empty
+    const defaultExperiences = [
         {
             company: 'Amazon',
             logo: '/brand-assets/amazonlogo-.png',
@@ -99,7 +110,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
         }
     ];
 
-    const featuredWriting = [
+    const defaultFeaturedWriting = [
         { year: '2025', title: 'Your LLM Might Already Be Backdoored and You Dont Even Know It' },
         { year: '2025', title: 'The 15 Git Commands Every Developer Needs to Join $2B+ Companies' },
         { year: '2024', title: 'Cracking the Code: How I Mastered REST API Interviews at Amazon' },
@@ -110,7 +121,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
         { year: '2022', title: 'Dhvagna-NPI: Lightweight English Speech Transcription for Developers' }
     ];
 
-    const previousProjects = [
+    const defaultPreviousProjects = [
         {
             icon: ProjectIcons.Pipeline,
             name: 'ML Pipeline Development',
@@ -155,7 +166,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
         }
     ];
 
-    const patents = [
+    const defaultPatents = [
         {
             year: '2024',
             title: 'MuteMemo: Invisible Overlay System for Real-Time Meeting Annotation',
@@ -163,7 +174,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
         }
     ];
 
-    const publications = [
+    const defaultPublications = [
         {
             year: '2025',
             title: 'Comparative Analysis of Different Operational Logic Gates for Cutting-Edge Technology',
@@ -175,6 +186,19 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
             description: 'Published in IEEE Gujarat. Authored with Vijay Rao Kumbhare, Bittu Kumar, Amit Kumar Shrivastava, Ashwini Kumar Varma, Aditya Japa.'
         }
     ];
+
+    // Use live data if available, else fallback
+    const experiences = liveExperiences && liveExperiences.length > 0 ? liveExperiences : defaultExperiences;
+    const featuredWriting = liveWritings && liveWritings.length > 0 ? liveWritings : defaultFeaturedWriting;
+    const previousProjectsRaw = liveProjects && liveProjects.length > 0 ? liveProjects : defaultPreviousProjects;
+    const patents = livePatents && livePatents.length > 0 ? livePatents : defaultPatents;
+    const publications = livePublications && livePublications.length > 0 ? livePublications : defaultPublications;
+
+    // Project icons mapping for live data
+    const mappedProjects = previousProjectsRaw.map(p => ({
+        ...p,
+        icon: typeof p.icon === 'string' ? (ProjectIcons[p.icon as keyof typeof ProjectIcons] || ProjectIcons.Pipeline) : p.icon,
+    }));
 
     return (
         <>
@@ -343,24 +367,27 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                 <div className="max-w-[1200px] mx-auto px-6">
                     <h2 className="text-3xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-12">Previous Projects</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                        {previousProjects.map((project, index) => (
-                            <div key={index} className="space-y-4 group cursor-pointer">
-                                <div className="text-[#555] dark:text-[#a0a0a0] group-hover:text-[#1a1a1a] dark:group-hover:text-[#f0f0f0] transition-colors">
-                                    <project.icon />
+                        {mappedProjects.map((project: any, index: number) => {
+                            const IconComponent = project.icon;
+                            return (
+                                <div key={index} className="space-y-4 group cursor-pointer">
+                                    <div className="text-[#555] dark:text-[#a0a0a0] group-hover:text-[#1a1a1a] dark:group-hover:text-[#f0f0f0] transition-colors">
+                                        <IconComponent />
+                                    </div>
+                                    <div className="flex items-baseline gap-3">
+                                        <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] group-hover:underline decoration-1 underline-offset-4">
+                                            {project.name}
+                                        </h3>
+                                        <span className="text-xs font-medium text-[#666] dark:text-[#999]">
+                                            {project.year}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
+                                        {project.description}
+                                    </p>
                                 </div>
-                                <div className="flex items-baseline gap-3">
-                                    <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] group-hover:underline decoration-1 underline-offset-4">
-                                        {project.name}
-                                    </h3>
-                                    <span className="text-xs font-medium text-[#666] dark:text-[#999]">
-                                        {project.year}
-                                    </span>
-                                </div>
-                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
-                                    {project.description}
-                                </p>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </section>

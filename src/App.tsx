@@ -1,4 +1,7 @@
+/// <reference types="vite/client" />
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -8,42 +11,64 @@ import { ResumeViewer } from './components/ResumeViewer';
 import { ScrollButton } from './components/ScrollButton';
 import { ReactLenis } from 'lenis/react';
 
-const App: React.FC = () => {
+// Import newly created pages (we will build these next)
+import { Login } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
+
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+
+const MainPortfolio: React.FC = () => {
     const [showAboutDesktop, setShowAboutDesktop] = useState(false);
     const [isResumeOpen, setIsResumeOpen] = useState(false);
 
     const handleAboutClick = () => {
-        // Native scroll removed, handled via Lenis in Header.tsx
         setShowAboutDesktop(true);
     };
 
     return (
-        <ThemeProvider>
-            <ReactLenis root options={{
-                lerp: 0.1,
-                duration: 1.5,
-                wheelMultiplier: 1,
-                touchMultiplier: 2,
-                infinite: false,
-            }}>
-                <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#131313] text-[#1a1a1a] dark:text-white font-[Manrope] transition-colors duration-300">
-                    <Header onAboutClick={handleAboutClick} onNavClick={() => setIsResumeOpen(false)} />
+        <ReactLenis root options={{
+            lerp: 0.1,
+            duration: 1.5,
+            wheelMultiplier: 1,
+            touchMultiplier: 2,
+            infinite: false,
+        }}>
+            <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#131313] text-[#1a1a1a] dark:text-white font-[Manrope] transition-colors duration-300">
+                <Header onAboutClick={handleAboutClick} onNavClick={() => setIsResumeOpen(false)} />
 
-                    <main className="flex-col w-full pt-16">
-                        {isResumeOpen ? (
-                            <ResumeViewer onClose={() => setIsResumeOpen(false)} />
-                        ) : (
-                            <>
-                                <HeroSection onAboutClick={handleAboutClick} onResumeClick={() => setIsResumeOpen(true)} />
-                                <AboutSection showAboutHeroDesktop={showAboutDesktop} onResumeClick={() => setIsResumeOpen(true)} />
-                            </>
-                        )}
-                        <Footer onNavClick={() => setIsResumeOpen(false)} />
-                    </main>
-                    <ScrollButton />
-                </div>
-            </ReactLenis>
-        </ThemeProvider>
+                <main className="flex-col w-full pt-16">
+                    {isResumeOpen ? (
+                        <ResumeViewer onClose={() => setIsResumeOpen(false)} />
+                    ) : (
+                        <>
+                            <HeroSection onAboutClick={handleAboutClick} onResumeClick={() => setIsResumeOpen(true)} />
+                            <AboutSection showAboutHeroDesktop={showAboutDesktop} onResumeClick={() => setIsResumeOpen(true)} />
+                        </>
+                    )}
+                    <Footer onNavClick={() => setIsResumeOpen(false)} />
+                </main>
+                <ScrollButton />
+            </div>
+        </ReactLenis>
+    );
+};
+
+const App: React.FC = () => {
+    return (
+        <ConvexProvider client={convex}>
+            <ThemeProvider>
+                <BrowserRouter>
+                    <Routes>
+                        {/* Main Portfolio Route */}
+                        <Route path="/" element={<MainPortfolio />} />
+
+                        {/* Admin Routes */}
+                        <Route path="/dashboard/login" element={<Login />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                    </Routes>
+                </BrowserRouter>
+            </ThemeProvider>
+        </ConvexProvider>
     );
 };
 
