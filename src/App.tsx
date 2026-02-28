@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
+import { ReactLenis } from 'lenis/react';
 
 const App: React.FC = () => {
     const [showAboutDesktop, setShowAboutDesktop] = useState(false);
@@ -20,15 +21,17 @@ const App: React.FC = () => {
 
     return (
         <ThemeProvider>
-            <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#131313] text-[#1a1a1a] dark:text-white font-[Manrope] transition-colors duration-300">
-                <Header onAboutClick={handleAboutClick} />
+            <ReactLenis root>
+                <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#131313] text-[#1a1a1a] dark:text-white font-[Manrope] transition-colors duration-300">
+                    <Header onAboutClick={handleAboutClick} />
 
-                <main className="flex-col w-full">
-                    <HeroSection onAboutClick={handleAboutClick} />
-                    <AboutSection showAboutHeroDesktop={showAboutDesktop} />
-                    <Footer />
-                </main>
-            </div>
+                    <main className="flex-col w-full">
+                        <HeroSection onAboutClick={handleAboutClick} />
+                        <AboutSection showAboutHeroDesktop={showAboutDesktop} />
+                        <Footer />
+                    </main>
+                </div>
+            </ReactLenis>
         </ThemeProvider>
     );
 };

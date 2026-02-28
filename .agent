@@ -1,0 +1,31 @@
+# UI/UX and Development Rules
+
+## Prefix Directives
+When creating or updating features, I will follow these instructions closely based on the prefixes provided in your requests:
+- **`-` (hyphen)**: The change or feature update applies to **ALL screen sizes** (ensure full responsiveness, scaling from mobile to desktop).
+- **`m-` (m hyphen)**: The change or feature update applies **ONLY to mobile and smaller screen sizes** (typically targeting screens below `md` breakpoint, e.g., `< 768px`). Use Tailwind `max-sm:` or standard mobile-first utilities without larger breakpoints overriding it incorrectly.
+- **`d-` (d hyphen)**: The change or feature update applies **ONLY to desktop, tablet, and all larger screen sizes** (typically targeting `md` or `lg` breakpoints and above, e.g., `>= 768px`).
+
+## Design System & Styling
+Always ensure components follow these guidelines for responsiveness, colors, and icons:
+
+### 1. Colors & Theme
+- **Theme Support**: The app uses a class-based dark mode (`.dark`). Always support both light and dark modes.
+- **Light Theme**:
+  - Background: `cream-50` (`#FDFBF7`)
+  - Text: `#1a1a1a`
+- **Dark Theme**:
+  - Background: `zinc-950` (`#131313`)
+  - Text: `white`
+- **Palette**: Leverage the extended Tailwind colors defined in `tailwind.config.js` (`cream-50` through `cream-900`, `zinc-950`).
+
+### 2. Typography
+- **Font Family**: `Manrope`, sans-serif (defined via var(--font-sans)).
+
+### 3. Responsiveness
+- Ensure every new component or updated layout handles varying screen sizes gracefully. 
+- Avoid fixed widths that break on smaller devices. Use relative units, flexbox, and grid.
+
+### 4. Icons
+- Keep icons consistent in sizing, padding, and stroke weight. Ensure they adapt properly to light/dark themes and respond correctly to hover states.
+- Scale icons appropriately alongside text sizes for mobile (`m-`) vs desktop (`d-`) contexts.
