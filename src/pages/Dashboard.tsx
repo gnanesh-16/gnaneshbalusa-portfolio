@@ -5,19 +5,19 @@ import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { Icons } from '../components/Icons';
 
-type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications';
+type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Deleted' | 'ExportImport';
 
 // --- Generic Data List Component ---
 const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
     // Determine which API methods to use based on the tab
-    let getQuery: any, addMut: any, delMut: any;
+    let getQuery: any, saveMut: any, delMut: any;
     let fields: { name: string, label: string, type?: string }[] = [];
 
     switch (tab) {
         case 'Experiences':
             getQuery = api.portfolio.getExperiences;
-            addMut = api.portfolio.addExperience;
-            delMut = api.portfolio.deleteExperience;
+            saveMut = api.portfolio.saveExperience;
+            delMut = api.portfolio.softDeleteExperience;
             fields = [
                 { name: 'company', label: 'Company' },
                 { name: 'logo', label: 'Logo URL' },
@@ -29,8 +29,8 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
             break;
         case 'Writings':
             getQuery = api.portfolio.getWritings;
-            addMut = api.portfolio.addWriting;
-            delMut = api.portfolio.deleteWriting;
+            saveMut = api.portfolio.saveWriting;
+            delMut = api.portfolio.softDeleteWriting;
             fields = [
                 { name: 'year', label: 'Year' },
                 { name: 'title', label: 'Title' },
@@ -39,8 +39,8 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
             break;
         case 'Projects':
             getQuery = api.portfolio.getProjects;
-            addMut = api.portfolio.addProject;
-            delMut = api.portfolio.deleteProject;
+            saveMut = api.portfolio.saveProject;
+            delMut = api.portfolio.softDeleteProject;
             fields = [
                 { name: 'name', label: 'Name' },
                 { name: 'icon', label: 'Icon URL' },
@@ -51,8 +51,8 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
             break;
         case 'Patents':
             getQuery = api.portfolio.getPatents;
-            addMut = api.portfolio.addPatent;
-            delMut = api.portfolio.deletePatent;
+            saveMut = api.portfolio.savePatent;
+            delMut = api.portfolio.softDeletePatent;
             fields = [
                 { name: 'title', label: 'Title' },
                 { name: 'year', label: 'Year' },
@@ -62,8 +62,8 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
             break;
         case 'Publications':
             getQuery = api.portfolio.getPublications;
-            addMut = api.portfolio.addPublication;
-            delMut = api.portfolio.deletePublication;
+            saveMut = api.portfolio.savePublication;
+            delMut = api.portfolio.softDeletePublication;
             fields = [
                 { name: 'title', label: 'Title' },
                 { name: 'year', label: 'Year' },
@@ -74,26 +74,63 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
     }
 
     const items = useQuery(getQuery) || [];
-    const addItem = useMutation(addMut);
+    const saveItem = useMutation(saveMut);
     const deleteItem = useMutation(delMut);
 
     const [formData, setFormData] = useState<Record<string, any>>({});
     const [isAdding, setIsAdding] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [deleteClicks, setDeleteClicks] = useState<Record<string, number>>({});
 
-    const handleAdd = async (e: React.FormEvent) => {
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await addItem({ token, ...formData });
+            await saveItem({ token, ...formData, id: editingId || undefined });
             setFormData({});
             setIsAdding(false);
+            setEditingId(null);
         } catch (error) {
-            alert('Error adding item. Ensure all fields are filled.');
+            alert('Error saving item. Ensure all fields are filled.');
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (confirm('Are you sure you want to delete this item?')) {
+    const handleEdit = (item: any) => {
+        setFormData(item);
+        setEditingId(item._id);
+        setIsAdding(true);
+        // Scroll to top where form is
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancel = () => {
+        setIsAdding(false);
+        setEditingId(null);
+        setFormData({});
+        setDeleteClicks({});
+    };
+
+    const handleDeleteClick = async (id: string) => {
+        const currentClicks = deleteClicks[id] || 0;
+
+        if (currentClicks >= 2) {
+            // 3rd click, actually delete
             await deleteItem({ token, id: id as any });
+            const newClicks = { ...deleteClicks };
+            delete newClicks[id];
+            setDeleteClicks(newClicks);
+        } else {
+            setDeleteClicks({ ...deleteClicks, [id]: currentClicks + 1 });
+
+            // Reset click count after 3 seconds if not clicked again
+            setTimeout(() => {
+                setDeleteClicks(prev => {
+                    const next = { ...prev };
+                    if (next[id] === currentClicks + 1) {
+                        delete next[id];
+                    }
+                    return next;
+                });
+            }, 3000);
         }
     };
 
@@ -102,7 +139,7 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
             <div className="flex justify-between items-center bg-[#F5F5F7] dark:bg-[#1C1C1E] p-4 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A]">
                 <h3 className="font-semibold text-lg">{tab} List</h3>
                 <button
-                    onClick={() => setIsAdding(!isAdding)}
+                    onClick={isAdding ? handleCancel : () => setIsAdding(true)}
                     className="px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white rounded-full text-sm font-medium transition-colors"
                 >
                     {isAdding ? 'Cancel' : 'Add New'}
@@ -110,8 +147,8 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
             </div>
 
             {isAdding && (
-                <form onSubmit={handleAdd} className="bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A] space-y-4 animate-in fade-in slide-in-from-top-4">
-                    <h4 className="font-semibold mb-4">Add new {tab.slice(0, -1)}</h4>
+                <form onSubmit={handleSave} className="bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A] space-y-4 animate-in fade-in slide-in-from-top-4">
+                    <h4 className="font-semibold mb-4">{editingId ? 'Edit' : 'Add new'} {tab.slice(0, -1)}</h4>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {fields.map(f => (
@@ -138,8 +175,8 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
                         ))}
                     </div>
 
-                    <button type="submit" className="px-6 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm font-medium hover:opacity-80 transition-opacity">
-                        Save Item
+                    <button type="submit" className="px-6 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm font-medium hover:opacity-80 transition-opacity mt-2">
+                        {editingId ? 'Update Item' : 'Save Item'}
                     </button>
                 </form>
             )}
@@ -155,13 +192,26 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
                                 <div className="text-sm text-[#86868B]">{item.period || item.year} {item.role ? `- ${item.role}` : ''}</div>
                                 {item.description && <div className="text-sm mt-2 text-[#555] dark:text-[#a0a0a0] line-clamp-2">{item.description}</div>}
                             </div>
-                            <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t border-[#D2D2D7] dark:border-[#38383A] md:border-t-0 justify-between md:justify-end">
-                                <span className="text-xs text-[#86868B] font-mono bg-[#F5F5F7] dark:bg-[#2C2C2E] px-2 py-1 rounded-md">Order: {item.order}</span>
+                            <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t border-[#D2D2D7] dark:border-[#38383A] md:border-t-0 justify-between md:justify-end">
+                                <span className="text-xs text-[#86868B] font-mono bg-[#F5F5F7] dark:bg-[#2C2C2E] px-2 py-1 rounded-md mr-2">Order: {item.order}</span>
+
                                 <button
-                                    onClick={() => handleDelete(item._id)}
-                                    className="text-red-500 hover:text-red-600 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                                    onClick={() => handleEdit(item)}
+                                    className="text-[#0071E3] hover:text-[#0077ED] text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-[#0071E3]/10 transition-colors"
                                 >
-                                    Delete
+                                    Edit
+                                </button>
+
+                                <button
+                                    onClick={() => handleDeleteClick(item._id)}
+                                    className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${(deleteClicks[item._id] || 0) > 0
+                                        ? 'bg-red-500 text-white hover:bg-red-600'
+                                        : 'text-red-500 hover:text-red-600 hover:bg-red-500/10'
+                                        }`}
+                                >
+                                    {(deleteClicks[item._id] || 0) === 0 ? 'Delete' :
+                                        (deleteClicks[item._id] === 1) ? 'Click again' :
+                                            'Confirm delete'}
                                 </button>
                             </div>
                         </div>
@@ -245,6 +295,32 @@ export const Dashboard: React.FC = () => {
                             </button>
                         );
                     })}
+
+                    <div className="h-[1px] bg-[#D2D2D7] dark:bg-[#38383A] my-4" />
+
+                    {/* Settings Tabs */}
+                    <button
+                        onClick={() => { setActiveTab('Deleted'); if (window.innerWidth < 768) setSidebarOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${activeTab === 'Deleted'
+                            ? 'bg-[#1D1D1F] text-white dark:bg-white dark:text-black shadow-md'
+                            : 'text-[#555] dark:text-[#a0a0a0] hover:bg-black/5 dark:hover:bg-white/10'
+                            } ${!sidebarOpen ? 'justify-center' : ''}`}
+                        title={!sidebarOpen ? 'Deleted' : undefined}
+                    >
+                        <Icons.X className={`w-5 h-5 flex-shrink-0 ${activeTab === 'Deleted' ? 'opacity-100' : 'opacity-70'}`} />
+                        <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} truncate`}>Deleted Items</span>
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('ExportImport'); if (window.innerWidth < 768) setSidebarOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${activeTab === 'ExportImport'
+                            ? 'bg-[#1D1D1F] text-white dark:bg-white dark:text-black shadow-md'
+                            : 'text-[#555] dark:text-[#a0a0a0] hover:bg-black/5 dark:hover:bg-white/10'
+                            } ${!sidebarOpen ? 'justify-center' : ''}`}
+                        title={!sidebarOpen ? 'Export / Import' : undefined}
+                    >
+                        <Icons.Layers className={`w-5 h-5 flex-shrink-0 ${activeTab === 'ExportImport' ? 'opacity-100' : 'opacity-70'}`} />
+                        <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} truncate`}>Export / Import</span>
+                    </button>
                 </nav>
 
                 <div className="p-4 border-t border-[#D2D2D7] dark:border-[#38383A]">
@@ -266,12 +342,204 @@ export const Dashboard: React.FC = () => {
 
                 <div className="p-6 md:p-10 max-w-5xl mx-auto">
                     <div className="hidden md:flex items-center justify-between mb-8">
-                        <h1 className="text-3xl font-bold tracking-tight">{activeTab}</h1>
+                        <h1 className="text-3xl font-bold tracking-tight">{
+                            activeTab === 'ExportImport' ? 'Export / Import' :
+                                activeTab === 'Deleted' ? 'Deleted Items' :
+                                    activeTab
+                        }</h1>
                     </div>
 
-                    <DataList tab={activeTab} token={token} />
+                    {activeTab === 'ExportImport' ? (
+                        <ExportImportView token={token} />
+                    ) : activeTab === 'Deleted' ? (
+                        <DeletedList token={token} />
+                    ) : (
+                        <DataList tab={activeTab as Tab} token={token} />
+                    )}
                 </div>
             </main>
         </div>
     );
 };
+
+const ExportImportView: React.FC<{ token: string }> = ({ token }) => {
+    const allData = useQuery(api.portfolio.getAllData);
+    const importDataMut = useMutation(api.portfolio.importData);
+    const [isImporting, setIsImporting] = useState(false);
+
+    const handleExport = () => {
+        if (!allData) return;
+        const dataStr = JSON.stringify(allData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const exportFileDefaultName = 'portfolio-backup.json';
+
+        let linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+    };
+
+    const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                setIsImporting(true);
+                const jsonData = JSON.parse(event.target?.result as string);
+                await importDataMut({ token, data: jsonData });
+                alert("Import successful!");
+            } catch (err) {
+                alert("Error importing file. Invalid format.");
+            } finally {
+                setIsImporting(false);
+                if (e.target) e.target.value = ''; // Reset file input
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white dark:bg-[#1C1C1E] p-8 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A] text-center space-y-6">
+                <div>
+                    <h3 className="text-xl font-bold mb-2">Export Data</h3>
+                    <p className="text-[#86868B] text-sm mb-6">Download a complete JSON backup of all your portfolio data.</p>
+                    <button
+                        onClick={handleExport}
+                        disabled={!allData}
+                        className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-medium hover:opacity-80 transition-opacity disabled:opacity-50"
+                    >
+                        Download JSON Backup
+                    </button>
+                </div>
+
+                <div className="h-[1px] bg-[#D2D2D7] dark:bg-[#38383A] w-full max-w-md mx-auto" />
+
+                <div>
+                    <h3 className="text-xl font-bold mb-2">Import Data</h3>
+                    <p className="text-[#86868B] text-sm mb-6">Upload a JSON backup file to append records to your database.</p>
+
+                    <label className="relative cursor-pointer transition-opacity text-[#0071E3] font-medium border-2 border-[#0071E3] px-6 py-3 rounded-full hover:bg-[#0071E3]/10 inline-block">
+                        {isImporting ? 'Importing...' : 'Upload JSON Backup'}
+                        <input
+                            type="file"
+                            accept=".json"
+                            className="hidden"
+                            onChange={handleImport}
+                            disabled={isImporting}
+                        />
+                    </label>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const DeletedList: React.FC<{ token: string }> = ({ token }) => {
+    // Collect all deleted items
+    const deletedExperiences = useQuery(api.portfolio.getDeletedExperiences) || [];
+    const deletedWritings = useQuery(api.portfolio.getDeletedWritings) || [];
+    const deletedProjects = useQuery(api.portfolio.getDeletedProjects) || [];
+    const deletedPatents = useQuery(api.portfolio.getDeletedPatents) || [];
+    const deletedPublications = useQuery(api.portfolio.getDeletedPublications) || [];
+
+    const restoreExp = useMutation(api.portfolio.restoreExperience);
+    const hardDelExp = useMutation(api.portfolio.hardDeleteExperience);
+    const restoreWrit = useMutation(api.portfolio.restoreWriting);
+    const hardDelWrit = useMutation(api.portfolio.hardDeleteWriting);
+    const restoreProj = useMutation(api.portfolio.restoreProject);
+    const hardDelProj = useMutation(api.portfolio.hardDeleteProject);
+    const restorePat = useMutation(api.portfolio.restorePatent);
+    const hardDelPat = useMutation(api.portfolio.hardDeletePatent);
+    const restorePub = useMutation(api.portfolio.restorePublication);
+    const hardDelPub = useMutation(api.portfolio.hardDeletePublication);
+
+    const [deleteClicks, setDeleteClicks] = useState<Record<string, number>>({});
+
+    const handleRestore = async (type: string, id: string) => {
+        switch (type) {
+            case 'Experiences': await restoreExp({ token, id: id as any }); break;
+            case 'Writings': await restoreWrit({ token, id: id as any }); break;
+            case 'Projects': await restoreProj({ token, id: id as any }); break;
+            case 'Patents': await restorePat({ token, id: id as any }); break;
+            case 'Publications': await restorePub({ token, id: id as any }); break;
+        }
+    };
+
+    const handleHardDelete = async (type: string, id: string) => {
+        const currentClicks = deleteClicks[id] || 0;
+
+        if (currentClicks >= 2) {
+            switch (type) {
+                case 'Experiences': await hardDelExp({ token, id: id as any }); break;
+                case 'Writings': await hardDelWrit({ token, id: id as any }); break;
+                case 'Projects': await hardDelProj({ token, id: id as any }); break;
+                case 'Patents': await hardDelPat({ token, id: id as any }); break;
+                case 'Publications': await hardDelPub({ token, id: id as any }); break;
+            }
+            const newClicks = { ...deleteClicks };
+            delete newClicks[id];
+            setDeleteClicks(newClicks);
+        } else {
+            setDeleteClicks({ ...deleteClicks, [id]: currentClicks + 1 });
+            setTimeout(() => {
+                setDeleteClicks(prev => {
+                    const next = { ...prev };
+                    if (next[id] === currentClicks + 1) delete next[id];
+                    return next;
+                });
+            }, 3000);
+        }
+    };
+
+    const allDeleted = [
+        ...deletedExperiences.map(i => ({ ...i, type: 'Experiences' })),
+        ...deletedWritings.map(i => ({ ...i, type: 'Writings' })),
+        ...deletedProjects.map(i => ({ ...i, type: 'Projects' })),
+        ...deletedPatents.map(i => ({ ...i, type: 'Patents' })),
+        ...deletedPublications.map(i => ({ ...i, type: 'Publications' }))
+    ].sort((a, b) => b._creationTime - a._creationTime);
+
+    return (
+        <div className="space-y-4 max-h-[660px] overflow-y-auto pr-2 custom-scrollbar">
+            {allDeleted.length === 0 ? (
+                <div className="text-center py-20 text-[#86868B]">Trash is empty.</div>
+            ) : (
+                allDeleted.map((item: any) => (
+                    <div key={item._id} className="bg-white dark:bg-[#1C1C1E] p-5 rounded-2xl border border-red-500/20 dark:border-red-500/20 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between group flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity">
+                        <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">{item.type}</span>
+                                <div className="font-semibold text-lg line-through">{item.title || item.company || item.name}</div>
+                            </div>
+                            <div className="text-sm text-[#86868B]">{item.period || item.year}</div>
+                        </div>
+                        <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t border-[#D2D2D7] dark:border-[#38383A] md:border-t-0 justify-between md:justify-end">
+                            <button
+                                onClick={() => handleRestore(item.type, item._id)}
+                                className="text-green-600 hover:text-green-700 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-green-600/10 transition-colors"
+                            >
+                                Restore
+                            </button>
+
+                            <button
+                                onClick={() => handleHardDelete(item.type, item._id)}
+                                className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${(deleteClicks[item._id] || 0) > 0
+                                        ? 'bg-red-500 text-white hover:bg-red-600'
+                                        : 'text-red-500 hover:text-red-600 hover:bg-red-500/10'
+                                    }`}
+                            >
+                                {(deleteClicks[item._id] || 0) === 0 ? 'Delete Permanently' :
+                                    (deleteClicks[item._id] === 1) ? 'Click again' :
+                                        'Confirm delete'}
+                            </button>
+                        </div>
+                    </div>
+                ))
+            )}
+        </div>
+    );
+};
+

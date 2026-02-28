@@ -10,21 +10,53 @@ const verifyToken = (token: string) => {
 // --- Experiences ---
 export const getExperiences = query({
     handler: async (ctx) => {
-        const items = await ctx.db.query("experiences").collect();
+        const items = await ctx.db.query("experiences")
+            .filter((q) => q.neq(q.field("isDeleted"), true))
+            .collect();
         return items.sort((a, b) => a.order - b.order);
     }
 });
 
-export const addExperience = mutation({
-    args: { token: v.string(), company: v.string(), logo: v.string(), period: v.string(), role: v.string(), description: v.string(), order: v.number() },
+export const getDeletedExperiences = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("experiences")
+            .filter((q) => q.eq(q.field("isDeleted"), true))
+            .collect();
+        return items;
+    }
+});
+
+export const saveExperience = mutation({
+    args: {
+        token: v.string(),
+        id: v.optional(v.id("experiences")),
+        company: v.string(),
+        logo: v.string(),
+        period: v.string(),
+        role: v.string(),
+        description: v.string(),
+        order: v.number()
+    },
     handler: async (ctx, args) => {
         verifyToken(args.token);
-        const { token, ...data } = args;
+        const { token, id, ...data } = args;
+        if (id) {
+            await ctx.db.patch(id, data);
+            return id;
+        }
         return await ctx.db.insert("experiences", data);
     }
 });
 
-export const deleteExperience = mutation({
+export const softDeleteExperience = mutation({
+    args: { token: v.string(), id: v.id("experiences") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: true });
+    }
+});
+
+export const hardDeleteExperience = mutation({
     args: { token: v.string(), id: v.id("experiences") },
     handler: async (ctx, args) => {
         verifyToken(args.token);
@@ -32,24 +64,61 @@ export const deleteExperience = mutation({
     }
 });
 
+export const restoreExperience = mutation({
+    args: { token: v.string(), id: v.id("experiences") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: false });
+    }
+});
+
 // --- Writings ---
 export const getWritings = query({
     handler: async (ctx) => {
-        const items = await ctx.db.query("writings").collect();
+        const items = await ctx.db.query("writings")
+            .filter((q) => q.neq(q.field("isDeleted"), true))
+            .collect();
         return items.sort((a, b) => a.order - b.order);
     }
 });
 
-export const addWriting = mutation({
-    args: { token: v.string(), year: v.string(), title: v.string(), order: v.number() },
+export const getDeletedWritings = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("writings")
+            .filter((q) => q.eq(q.field("isDeleted"), true))
+            .collect();
+        return items;
+    }
+});
+
+export const saveWriting = mutation({
+    args: {
+        token: v.string(),
+        id: v.optional(v.id("writings")),
+        year: v.string(),
+        title: v.string(),
+        order: v.number()
+    },
     handler: async (ctx, args) => {
         verifyToken(args.token);
-        const { token, ...data } = args;
+        const { token, id, ...data } = args;
+        if (id) {
+            await ctx.db.patch(id, data);
+            return id;
+        }
         return await ctx.db.insert("writings", data);
     }
 });
 
-export const deleteWriting = mutation({
+export const softDeleteWriting = mutation({
+    args: { token: v.string(), id: v.id("writings") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: true });
+    }
+});
+
+export const hardDeleteWriting = mutation({
     args: { token: v.string(), id: v.id("writings") },
     handler: async (ctx, args) => {
         verifyToken(args.token);
@@ -57,24 +126,63 @@ export const deleteWriting = mutation({
     }
 });
 
+export const restoreWriting = mutation({
+    args: { token: v.string(), id: v.id("writings") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: false });
+    }
+});
+
 // --- Projects ---
 export const getProjects = query({
     handler: async (ctx) => {
-        const items = await ctx.db.query("projects").collect();
+        const items = await ctx.db.query("projects")
+            .filter((q) => q.neq(q.field("isDeleted"), true))
+            .collect();
         return items.sort((a, b) => a.order - b.order);
     }
 });
 
-export const addProject = mutation({
-    args: { token: v.string(), icon: v.string(), name: v.string(), year: v.string(), description: v.string(), order: v.number() },
+export const getDeletedProjects = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("projects")
+            .filter((q) => q.eq(q.field("isDeleted"), true))
+            .collect();
+        return items;
+    }
+});
+
+export const saveProject = mutation({
+    args: {
+        token: v.string(),
+        id: v.optional(v.id("projects")),
+        icon: v.string(),
+        name: v.string(),
+        year: v.string(),
+        description: v.string(),
+        order: v.number()
+    },
     handler: async (ctx, args) => {
         verifyToken(args.token);
-        const { token, ...data } = args;
+        const { token, id, ...data } = args;
+        if (id) {
+            await ctx.db.patch(id, data);
+            return id;
+        }
         return await ctx.db.insert("projects", data);
     }
 });
 
-export const deleteProject = mutation({
+export const softDeleteProject = mutation({
+    args: { token: v.string(), id: v.id("projects") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: true });
+    }
+});
+
+export const hardDeleteProject = mutation({
     args: { token: v.string(), id: v.id("projects") },
     handler: async (ctx, args) => {
         verifyToken(args.token);
@@ -82,24 +190,62 @@ export const deleteProject = mutation({
     }
 });
 
+export const restoreProject = mutation({
+    args: { token: v.string(), id: v.id("projects") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: false });
+    }
+});
+
 // --- Patents ---
 export const getPatents = query({
     handler: async (ctx) => {
-        const items = await ctx.db.query("patents").collect();
+        const items = await ctx.db.query("patents")
+            .filter((q) => q.neq(q.field("isDeleted"), true))
+            .collect();
         return items.sort((a, b) => a.order - b.order);
     }
 });
 
-export const addPatent = mutation({
-    args: { token: v.string(), year: v.string(), title: v.string(), description: v.string(), order: v.number() },
+export const getDeletedPatents = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("patents")
+            .filter((q) => q.eq(q.field("isDeleted"), true))
+            .collect();
+        return items;
+    }
+});
+
+export const savePatent = mutation({
+    args: {
+        token: v.string(),
+        id: v.optional(v.id("patents")),
+        year: v.string(),
+        title: v.string(),
+        description: v.string(),
+        order: v.number()
+    },
     handler: async (ctx, args) => {
         verifyToken(args.token);
-        const { token, ...data } = args;
+        const { token, id, ...data } = args;
+        if (id) {
+            await ctx.db.patch(id, data);
+            return id;
+        }
         return await ctx.db.insert("patents", data);
     }
 });
 
-export const deletePatent = mutation({
+export const softDeletePatent = mutation({
+    args: { token: v.string(), id: v.id("patents") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: true });
+    }
+});
+
+export const hardDeletePatent = mutation({
     args: { token: v.string(), id: v.id("patents") },
     handler: async (ctx, args) => {
         verifyToken(args.token);
@@ -107,28 +253,74 @@ export const deletePatent = mutation({
     }
 });
 
+export const restorePatent = mutation({
+    args: { token: v.string(), id: v.id("patents") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: false });
+    }
+});
+
 // --- Publications ---
 export const getPublications = query({
     handler: async (ctx) => {
-        const items = await ctx.db.query("publications").collect();
+        const items = await ctx.db.query("publications")
+            .filter((q) => q.neq(q.field("isDeleted"), true))
+            .collect();
         return items.sort((a, b) => a.order - b.order);
     }
 });
 
-export const addPublication = mutation({
-    args: { token: v.string(), year: v.string(), title: v.string(), description: v.string(), order: v.number() },
+export const getDeletedPublications = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("publications")
+            .filter((q) => q.eq(q.field("isDeleted"), true))
+            .collect();
+        return items;
+    }
+});
+
+export const savePublication = mutation({
+    args: {
+        token: v.string(),
+        id: v.optional(v.id("publications")),
+        year: v.string(),
+        title: v.string(),
+        description: v.string(),
+        order: v.number()
+    },
     handler: async (ctx, args) => {
         verifyToken(args.token);
-        const { token, ...data } = args;
+        const { token, id, ...data } = args;
+        if (id) {
+            await ctx.db.patch(id, data);
+            return id;
+        }
         return await ctx.db.insert("publications", data);
     }
 });
 
-export const deletePublication = mutation({
+export const softDeletePublication = mutation({
+    args: { token: v.string(), id: v.id("publications") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: true });
+    }
+});
+
+export const hardDeletePublication = mutation({
     args: { token: v.string(), id: v.id("publications") },
     handler: async (ctx, args) => {
         verifyToken(args.token);
         await ctx.db.delete(args.id);
+    }
+});
+
+export const restorePublication = mutation({
+    args: { token: v.string(), id: v.id("publications") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: false });
     }
 });
 
@@ -210,5 +402,74 @@ export const seedData = mutation({
         for (const p of publications) await ctx.db.insert("publications", p);
 
         return "Seeded successfully";
+    }
+});
+
+// --- Data Portability ---
+export const getAllData = query({
+    handler: async (ctx) => {
+        const experiences = await ctx.db.query("experiences").collect();
+        const writings = await ctx.db.query("writings").collect();
+        const projects = await ctx.db.query("projects").collect();
+        const patents = await ctx.db.query("patents").collect();
+        const publications = await ctx.db.query("publications").collect();
+
+        return {
+            experiences,
+            writings,
+            projects,
+            patents,
+            publications
+        };
+    }
+});
+
+export const importData = mutation({
+    args: {
+        token: v.string(),
+        data: v.object({
+            experiences: v.optional(v.array(v.any())),
+            writings: v.optional(v.array(v.any())),
+            projects: v.optional(v.array(v.any())),
+            patents: v.optional(v.array(v.any())),
+            publications: v.optional(v.array(v.any())),
+        })
+    },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        const { data } = args;
+
+        if (data.experiences) {
+            for (const item of data.experiences) {
+                const { _id, _creationTime, ...fields } = item;
+                await ctx.db.insert("experiences", fields as any);
+            }
+        }
+        if (data.writings) {
+            for (const item of data.writings) {
+                const { _id, _creationTime, ...fields } = item;
+                await ctx.db.insert("writings", fields as any);
+            }
+        }
+        if (data.projects) {
+            for (const item of data.projects) {
+                const { _id, _creationTime, ...fields } = item;
+                await ctx.db.insert("projects", fields as any);
+            }
+        }
+        if (data.patents) {
+            for (const item of data.patents) {
+                const { _id, _creationTime, ...fields } = item;
+                await ctx.db.insert("patents", fields as any);
+            }
+        }
+        if (data.publications) {
+            for (const item of data.publications) {
+                const { _id, _creationTime, ...fields } = item;
+                await ctx.db.insert("publications", fields as any);
+            }
+        }
+
+        return "Import complete";
     }
 });

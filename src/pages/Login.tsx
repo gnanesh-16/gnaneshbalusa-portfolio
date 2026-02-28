@@ -51,7 +51,7 @@ export const Login: React.FC = () => {
                                 <div className="absolute inset-0 bg-gradient-to-tr from-[#FF5C33] via-[#E82A6A] to-[#8C1B74] opacity-80" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)' }}></div>
                             </div>
                         </div>
-                        <h1 className="text-2xl font-bold tracking-tight text-white m-0">Sign in to Convex</h1>
+                        <h1 className="text-2xl font-bold tracking-tight text-white m-0">Sign in to Gnanie</h1>
                     </div>
 
                     <div className="bg-[#2D2A26] rounded-xl p-8 border border-white/5 shadow-2xl">

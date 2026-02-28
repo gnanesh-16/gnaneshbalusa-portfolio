@@ -9,11 +9,13 @@ export default defineSchema({
         role: v.string(),
         description: v.string(),
         order: v.number(),
+        isDeleted: v.optional(v.boolean()),
     }),
     writings: defineTable({
         year: v.string(),
         title: v.string(),
         order: v.number(),
+        isDeleted: v.optional(v.boolean()),
     }),
     projects: defineTable({
         icon: v.string(),
@@ -21,17 +23,20 @@ export default defineSchema({
         year: v.string(),
         description: v.string(),
         order: v.number(),
+        isDeleted: v.optional(v.boolean()),
     }),
     patents: defineTable({
         year: v.string(),
         title: v.string(),
         description: v.string(),
         order: v.number(),
+        isDeleted: v.optional(v.boolean()),
     }),
     publications: defineTable({
         year: v.string(),
         title: v.string(),
         description: v.string(),
         order: v.number(),
+        isDeleted: v.optional(v.boolean()),
     }),
 });
