@@ -85,11 +85,13 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await saveItem({ token, ...formData, id: editingId || undefined });
+            const { _id, _creationTime, isDeleted, ...cleanData } = formData;
+            await saveItem({ token, ...cleanData, id: editingId || undefined });
             setFormData({});
             setIsAdding(false);
             setEditingId(null);
         } catch (error) {
+            console.error(error);
             alert('Error saving item. Ensure all fields are filled.');
         }
     };
@@ -527,8 +529,8 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
                             <button
                                 onClick={() => handleHardDelete(item.type, item._id)}
                                 className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${(deleteClicks[item._id] || 0) > 0
-                                        ? 'bg-red-500 text-white hover:bg-red-600'
-                                        : 'text-red-500 hover:text-red-600 hover:bg-red-500/10'
+                                    ? 'bg-red-500 text-white hover:bg-red-600'
+                                    : 'text-red-500 hover:text-red-600 hover:bg-red-500/10'
                                     }`}
                             >
                                 {(deleteClicks[item._id] || 0) === 0 ? 'Delete Permanently' :
