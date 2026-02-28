@@ -60,17 +60,12 @@ const ProjectIcons = {
 export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop = true, onResumeClick }) => {
     const handleResumeClick = () => {
         // Direct download link from Google Drive
-        const downloadUrl = "https://drive.google.com/uc?export=download&id=16AKWcSpsPhDa2G9kIBxZ-Wb_2E7eYnB8";
+        const downloadUrl = "https://drive.google.com/uc?export=download&id=16AKWcSpsPhDa2G9kIBxZ-Wb_2E7eYnB8&confirm=t";
 
-        // Trigger download
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.setAttribute('download', 'Gnanesh_Balusa_Resume.pdf');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Trigger download in a new tab/hidden window to prevent redirection
+        window.open(downloadUrl, '_blank');
 
-        // Open modal/viewer
+        // Open the internal resume viewer
         onResumeClick?.();
     };
     const experiences = [
@@ -230,7 +225,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                                     <div className="md:hidden">
                                         <button
                                             onClick={handleResumeClick}
-                                            className="px-5 py-2.5 bg-[#1a1a1a] dark:bg-[#f0f0f0] text-white dark:text-black rounded-full font-bold hover:opacity-90 transition-all text-[11px] uppercase tracking-wider shadow-md"
+                                            className="px-5 py-2.5 bg-[#1a1a1a] dark:bg-[#f0f0f0] text-white dark:text-black rounded-full font-bold hover:opacity-90 transition-all text-[11px] uppercase tracking-wider shadow-md inline-block"
                                         >
                                             Resume
                                         </button>
