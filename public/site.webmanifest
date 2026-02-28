@@ -1,0 +1,16 @@
+{
+    "name": "Gnanesh Balusa Portfolio",
+    "short_name": "Gnanie",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "description": "Portfolio of Gnanesh Balusa, ML Engineer and Software Developer.",
+    "icons": [
+        {
+            "src": "/brand-assets/gnaneshbalusaprofileamazon_webp.webp",
+            "sizes": "192x192",
+            "type": "image/webp"
+        }
+    ]
+}

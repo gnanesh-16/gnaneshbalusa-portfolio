@@ -10,6 +10,7 @@ import { AboutSection } from './components/AboutSection';
 import { ResumeViewer } from './components/ResumeViewer';
 import { ScrollButton } from './components/ScrollButton';
 import { ReactLenis } from 'lenis/react';
+import { Analytics } from '@vercel/analytics/react';
 
 // Import newly created pages (we will build these next)
 import { Login } from './pages/Login';
@@ -67,6 +68,7 @@ const App: React.FC = () => {
                         <Route path="/dashboard" element={<Dashboard />} />
                     </Routes>
                 </BrowserRouter>
+                <Analytics />
             </ThemeProvider>
         </ConvexProvider>
     );

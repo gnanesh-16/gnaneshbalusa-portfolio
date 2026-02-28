@@ -1,0 +1,13 @@
+/* TEAM */
+Engineer: Gnanesh Balusa
+Contact: balusagnaneshs@gmail.com
+LinkedIn: https://linkedin.com/in/gnaneshbalusa
+GitHub: https://github.com/gnanesh-16
+Medium: https://medium.com/@GnaneshBalusa
+
+/* SITE */
+Last update: 2026
+Standards: HTML5, CSS3, ES6, React, Vite
+Components: Tailwind CSS
+Backend: Convex
+Tools: GitHub, Vercel

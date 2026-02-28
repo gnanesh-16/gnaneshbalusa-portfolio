@@ -1,0 +1,65 @@
+# robots.txt for gnanie.vercel.app
+# Gnanesh Balusa — ML Engineer at Amazon | Portfolio
+
+# Allow all search engines full access
+User-agent: *
+Allow: /
+
+# Explicitly allow major AI crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: ia_archiver
+Allow: /
+
+# Sitemaps
+Sitemap: https://gnanie.vercel.app/sitemap.xml
+Sitemap: https://gnanie.vercel.app/sitemap-index.xml
+
+# Host
+Host: https://gnanie.vercel.app

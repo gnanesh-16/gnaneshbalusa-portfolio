@@ -5,7 +5,7 @@ import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { Icons } from '../components/Icons';
 
-type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Deleted' | 'ExportImport';
+type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Deleted' | 'ExportImport' | 'Analytics';
 
 // --- Generic Data List Component ---
 const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
@@ -302,6 +302,17 @@ export const Dashboard: React.FC = () => {
 
                     {/* Settings Tabs */}
                     <button
+                        onClick={() => { setActiveTab('Analytics'); if (window.innerWidth < 768) setSidebarOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${activeTab === 'Analytics'
+                            ? 'bg-[#1D1D1F] text-white dark:bg-white dark:text-black shadow-md'
+                            : 'text-[#555] dark:text-[#a0a0a0] hover:bg-black/5 dark:hover:bg-white/10'
+                            } ${!sidebarOpen ? 'justify-center' : ''}`}
+                        title={!sidebarOpen ? 'Analytics' : undefined}
+                    >
+                        <Icons.Layers className={`w-5 h-5 flex-shrink-0 ${activeTab === 'Analytics' ? 'opacity-100' : 'opacity-70'}`} />
+                        <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} truncate`}>Analytics</span>
+                    </button>
+                    <button
                         onClick={() => { setActiveTab('Deleted'); if (window.innerWidth < 768) setSidebarOpen(false); }}
                         className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${activeTab === 'Deleted'
                             ? 'bg-[#1D1D1F] text-white dark:bg-white dark:text-black shadow-md'
@@ -355,11 +366,64 @@ export const Dashboard: React.FC = () => {
                         <ExportImportView token={token} />
                     ) : activeTab === 'Deleted' ? (
                         <DeletedList token={token} />
+                    ) : activeTab === 'Analytics' ? (
+                        <AnalyticsView token={token} />
                     ) : (
                         <DataList tab={activeTab as Tab} token={token} />
                     )}
                 </div>
             </main>
+        </div>
+    );
+};
+
+const AnalyticsView: React.FC<{ token: string }> = ({ token }) => {
+    const allData = useQuery(api.portfolio.getAllData);
+
+    // Calculate stats
+    const stats = [
+        { label: 'Experiences', count: allData?.experiences.length || 0 },
+        { label: 'Writings', count: allData?.writings.length || 0 },
+        { label: 'Projects', count: allData?.projects.length || 0 },
+        { label: 'Patents', count: allData?.patents.length || 0 },
+        { label: 'Publications', count: allData?.publications.length || 0 },
+    ];
+
+    const total = stats.reduce((acc, curr) => acc + curr.count, 0);
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white dark:bg-[#1C1C1E] p-8 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A]">
+                <h3 className="text-xl font-bold mb-6">Database Overview</h3>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-[#F5F5F7] dark:bg-[#2C2C2E] p-4 rounded-xl border border-[#D2D2D7]/50 dark:border-[#38383A]/50">
+                        <div className="text-sm text-[#86868B] font-semibold mb-1">Total Records</div>
+                        <div className="text-3xl font-bold">{total}</div>
+                    </div>
+                    {stats.map(s => (
+                        <div key={s.label} className="bg-[#F5F5F7] dark:bg-[#2C2C2E] p-4 rounded-xl border border-[#D2D2D7]/50 dark:border-[#38383A]/50">
+                            <div className="text-sm text-[#86868B] font-semibold mb-1">{s.label}</div>
+                            <div className="text-2xl font-bold">{s.count}</div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="h-[1px] bg-[#D2D2D7] dark:bg-[#38383A] w-full mb-8" />
+
+                <h3 className="text-xl font-bold mb-4">Traffic & Web Analytics</h3>
+                <p className="text-[#86868B] text-sm mb-6">
+                    Real-time audience analytics, page views, and performance metrics are tracked securely via Vercel Web Analytics.
+                </p>
+                <a
+                    href="https://vercel.com/dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-medium hover:opacity-80 transition-opacity"
+                >
+                    Open Vercel Dashboard
+                </a>
+            </div>
         </div>
     );
 };

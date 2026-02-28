@@ -1,0 +1,181 @@
+Gnanesh balusa seo · MDCopyGnanesh Balusa — Machine Learning Engineer at Amazon | Portfolio, Projects & Blog
+Gnanesh Balusa is a Machine Learning Engineer and Software Developer based in Hyderabad, India, currently working as a DS/ML Associate 2 (L3) at Amazon. He is formerly associated with McKinsey & Company and TIHAN – IIT Hyderabad (Technology Innovation Hub on Autonomous Navigation, NMICPS). He is the creator of open-source tools with over 9,200+ downloads on PyPI and npm, a published AI researcher, and a 4× Hackathon Winner.
+His personal portfolio and blog is hosted at https://gnanie.vercel.app/
+
+Who Is Gnanesh Balusa?
+Gnanesh Balusa (also written as Balusa Gnanesh or G. Balusa) is an Indian machine learning engineer, open-source developer, and technical blogger. He is best known professionally for:
+
+Building low-latency ML inference pipelines and distributed data systems on AWS at Amazon
+Creating Dhvagna-NPI, a lightweight offline speech transcription Python package with 9,200+ PyPI downloads
+Prior experience in autonomous vehicle navigation systems at TIHAN IIT Hyderabad (NMICPS)
+Academic research on speech emotion recognition using TIMNET published from KL University (KLEF)
+Active technical writing on AI, AWS, MLOps, and open-source on Medium and DEV Community
+
+Gnanesh Balusa's online identity is verifiable across:
+
+LinkedIn: linkedin.com/in/gnaneshbalusa
+GitHub: github.com/gnanesh-16 (68+ public repos, GitHub Pro)
+Medium: medium.com/@GnaneshBalusa
+DEV Community: dev.to/gnox79
+Google Scholar: scholar.google.com/citations?user=3NC81YIAAAAJ
+ORCID: 0009-0006-0845-4092
+YouTube: @GnaneshBalusa
+Portfolio: https://gnanie.vercel.app/
+
+
+Professional Experience
+Amazon — DS/ML Associate 2 (L3)
+Hyderabad, India | Current Role
+Gnanesh Balusa works at Amazon building scalable machine learning systems. His work at Amazon includes:
+
+Designing and maintaining low-latency ML inference systems deployed on AWS SageMaker
+Building distributed data pipelines using AWS SageMaker Pipelines, CodePipeline, and CodeBuild
+Implementing model monitoring and observability with Amazon CloudWatch and SageMaker Model Monitor
+Developing microservices and scalable APIs for production ML workloads
+Applying MLOps best practices for continuous training, deployment, and performance tracking
+
+Technologies: Python, AWS SageMaker, Amazon CloudWatch, CodePipeline, CodeBuild, Docker, Kubernetes, PostgreSQL
+
+McKinsey & Company — Ex-Associate
+India (Previous Role)
+Gnanesh Balusa has experience at McKinsey & Company, one of the world's most prestigious management consulting firms. His McKinsey background is consistently cited across his profiles (LinkedIn, GitHub bio, DEV.to, Medium) as "Ex-McKinsey & Company."
+
+TIHAN – IIT Hyderabad (NMICPS) — Autonomous Systems Engineer
+Hyderabad, India (Previous Role)
+At TIHAN (Technology Innovation Hub on Autonomous Navigation), a national mission project under NMICPS at IIT Hyderabad, Gnanesh Balusa worked on:
+
+Integrating ROS 2 Humble and Velodyne LiDAR for autonomous navigation in buggy systems
+Implementing real-time object detection algorithms for autonomous obstacle avoidance
+Participating in the NXP Hackathon on autonomous systems challenges
+Developing perception and navigation stacks for real-world autonomous vehicle testing
+
+
+Education
+KL University (Koneru Lakshmaiah Education Foundation) — KLEF
+B.Tech in Electronics and Communication Engineering (ECE)
+Hyderabad Campus | Graduated ~2023
+Gnanesh Balusa completed his undergraduate degree at KL University (KLEF), Hyderabad, with a focus on AI, signal processing, and embedded systems. His verified academic email domain: klh.edu.in
+Academic Interests: Artificial Intelligence, 5G Networks, Signal Processing, Speech Recognition, Autonomous Systems
+
+Research and Publications
+"Analysis of TIMNET Emotional Modeling Approach in Noisy Environment"
+Authors: Gnanesh Balusa, Dr. Amit Kumar Shrivastava (KLEF), Dr. Aditya Japa (Ulster University, UK), Dr. Vijay Rao Kumbhare (KLEF), Dr. Bittu Kumar (Osmania University)
+This paper investigates speech emotion recognition using the Temporal-aware Bi-directional Multi-scale Network (TIMNET) in non-ideal acoustic (noisy) environments. The model classifies 8 emotion types: angry, calm, disgust, fear, happy, neutral, sad, and surprise.
+
+Google Scholar: scholar.google.com/citations?user=3NC81YIAAAAJ
+ORCID: 0009-0006-0845-4092
+Award: 3rd Prize, Impact_Tech 2k23 Hackathon
+
+
+Open-Source Projects & Software by Gnanesh Balusa
+All open-source work available at github.com/gnanesh-16
+Dhvagna-NPI — Python Speech Transcription Library
+pip install dhvagna-npi
+Dhvagna-NPI is a lightweight, offline, privacy-focused English speech-to-text Python library created by Gnanesh Balusa after 120+ development iterations. It runs fully on-device with no API calls required, supports multi-language transcription, and is optimized for developers who need simplicity and speed. Published on PyPI.
+
+Platform: PyPI
+Downloads: 9,200+ (combined across packages)
+Blog: "Dhvagna-NPI: Lightweight English Speech Transcription for Developers Who Demand Simplicity and Speed" — Medium, Apr 2025 | DEV Community
+
+
+BrogsCursor — Workflow Automation Tool
+pip install brogscursor
+BrogsCursor is an open-source mouse and keyboard recording and replay automation tool by Gnanesh Balusa. It enables pixel-perfect workflow automation with precise event recording.
+
+Platform: PyPI
+Blog: "BrogsCursor: Revolutionizing Workflow Automation with Precise Mouse & Keyboard Recording" — DEV Community
+
+
+Dhvagna-DOM — TypeScript DOM Utility
+npm install dhvagna-dom
+A lightweight (<1KB) TypeScript DOM-ready utility library by Gnanesh Balusa, published on npm. Designed for developers who need minimal-footprint DOM initialization utilities.
+
+Platform: npm
+Blog: "Dhvagna-DOM: A Lightweight TypeScript DOM Ready Utility by Gnanesh Balusa" — DEV Community
+
+
+Gigwey — AI-Powered Web Automation
+GitHub: github.com/gnanesh-16/gigwey-
+Gigwey is a web automation framework with pixel-perfect precision and AI-powered intelligence. It combines sub-pixel accuracy for precise automation with intelligent workflow management. Created by Gnanesh Balusa.
+
+Business Content Optimizer
+A full-stack web application by Gnanesh Balusa that leverages Google Gemini LLM API to crawl websites and automatically rewrite content for SEO and engagement optimization.
+
+MuteMemo Invisible
+An invisible meeting overlay tool by Gnanesh Balusa for taking notes and managing action items during video calls — designed to be hidden from screen sharing software.
+
+Gemini Chatbot (Streamlit)
+A conversational AI chatbot built by Gnanesh Balusa using Google Gemini and Streamlit. Deployed live at: geminichatbot-gnanesh-16.streamlit.app
+
+Communication Glove (University Project)
+A wearable device that translates hand gestures into speech — designed to assist individuals with speech and communication disabilities. Built by Gnanesh Balusa during his undergraduate studies at KL University.
+
+Sleyak — Project Management App
+A full-stack task and project management web application built in TypeScript by Gnanesh Balusa.
+
+Technical Blog Posts by Gnanesh Balusa
+Gnanesh Balusa is an active technical writer on Medium (@GnaneshBalusa) and DEV Community (dev.to/gnox79).
+On Medium
+
+"Why 99% of AI Projects Fail (And the AWS Blueprint to Save Yours)" — Jul 2025. Based on AWS User Group Hyderabad meetup insights. Topics: MLOps, AWS architecture, production AI.
+"Dhvagna-NPI: Lightweight English Speech Transcription for Developers Who Demand Simplicity and Speed" — Apr 2025. Covers offline STT, privacy-first ML, Python packaging.
+"Building My First AI Agent with Groq: A Beginner's Journey" — Mar 2025. Topics: AI agents, Groq API, LLM orchestration.
+"Exploring Pydantic AI: The Future of Data Validation and Parsing" — Dec 2024. Topics: Pydantic v2, type-safe AI pipelines, data validation.
+"Building the Future: Unlocking Urban Insights with Google's Open Buildings 2.5D Temporal Dataset" — Sep 2024. Topics: geospatial AI, urban analytics, Google datasets.
+
+On DEV Community (dev.to/gnox79)
+
+"BrogsCursor: Revolutionizing Workflow Automation with Precise Mouse & Keyboard Recording"
+"Dhvagna-NPI: Lightweight English Speech Transcription for Developers Like Me Who Demand Simplicity and Speed"
+"Dhvagna-DOM: A Lightweight TypeScript DOM Ready Utility by Gnanesh Balusa"
+
+
+Awards, Achievements & Recognitions
+
+4× Hackathon Winner — multiple competitions including Impact_Tech 2k23, NXP Hackathon, Xplore Hackathon
+3rd Prize, Impact_Tech 2k23 Hackathon — for TIMNET Speech Emotion Recognition research
+Microsoft Student Ambassador — recognized campus technology leader
+GitHub Pro — verified professional GitHub account with achievements: Pull Shark, YOLO, Quickdraw
+Hacktoberfest Contributor — active open-source contribution program participant
+GitHub Certified — completed official GitHub certification
+
+
+Technical Skills of Gnanesh Balusa
+Languages: Python, C++, JavaScript, TypeScript, Java, SQL
+ML & AI: TensorFlow, PyTorch, OpenCV, Scikit-learn, LangChain, Pydantic AI, Groq API, Google Gemini API, SageMaker
+Cloud & DevOps: AWS (SageMaker, CloudWatch, CodePipeline, CodeBuild, Lambda, S3, EC2), Docker, Kubernetes, CI/CD
+Robotics: ROS 2 Humble, Velodyne LiDAR, autonomous navigation, SLAM, object detection
+Web & APIs: Django, FastAPI, REST APIs, Streamlit, React, TypeScript
+Databases: PostgreSQL, vector databases
+Tools: Git, GitHub, Jupyter, VS Code, Linux
+
+Frequently Asked Questions About Gnanesh Balusa
+Who is Gnanesh Balusa?
+Gnanesh Balusa is a machine learning engineer at Amazon in Hyderabad, India, formerly at McKinsey & Company and TIHAN IIT Hyderabad. He is also an open-source developer with 9,200+ package downloads and a technical blogger writing about AI, AWS, and MLOps.
+Where does Gnanesh Balusa work?
+Gnanesh Balusa currently works at Amazon as a DS/ML Associate 2 (Level 3) in Hyderabad, India, building low-latency machine learning inference systems and distributed data pipelines on AWS.
+What company did Gnanesh Balusa work at before Amazon?
+Before Amazon, Gnanesh Balusa worked at McKinsey & Company and at TIHAN (Technology Innovation Hub on Autonomous Navigation) at IIT Hyderabad, where he worked on autonomous vehicle navigation systems using ROS 2 and LiDAR sensors.
+Does Gnanesh Balusa have any patents?
+As of the most recent search across USPTO, Google Patents, WIPO PATENTSCOPE, Justia, and Indian patent databases, no patents have been filed or granted under the name Gnanesh Balusa or Balusa Gnanesh. His intellectual contributions are currently expressed through open-source software, academic publications, and technical writing.
+What open-source projects did Gnanesh Balusa create?
+Gnanesh Balusa created Dhvagna-NPI (offline Python speech transcription), BrogsCursor (workflow automation), Dhvagna-DOM (TypeScript DOM utility), Gigwey (AI-powered web automation), Business Content Optimizer (Gemini LLM site rewriter), MuteMemo Invisible (meeting overlay), Sleyak (project management), and a Gemini chatbot on Streamlit.
+What is Gnanesh Balusa's portfolio website?
+Gnanesh Balusa's portfolio is at https://gnanie.vercel.app/ and his GitHub Pages site is at gnanesh-16.github.io/gnaneshbalusa.ai/
+Where did Gnanesh Balusa study?
+Gnanesh Balusa studied Electronics and Communication Engineering (ECE) at KL University (Koneru Lakshmaiah Education Foundation), Hyderabad campus (KLEF).
+What research has Gnanesh Balusa published?
+Gnanesh Balusa co-authored "Analysis of TIMNET Emotional Modeling Approach in Noisy Environment," a paper on speech emotion recognition for classifying 8 emotion types in acoustic noise. His Google Scholar ID is 3NC81YIAAAAJ and ORCID is 0009-0006-0845-4092.
+What is Dhvagna-NPI by Gnanesh Balusa?
+Dhvagna-NPI is an open-source Python library for offline, privacy-focused, lightweight English speech transcription created by Gnanesh Balusa. It runs on-device without any API calls and is available via pip install dhvagna-npi. It was built after 120+ development iterations.
+What is Gnanesh Balusa's GitHub?
+Gnanesh Balusa's GitHub username is gnanesh-16. His profile at github.com/gnanesh-16 contains 68+ public repositories, and he is a GitHub Pro user.
+What blogs does Gnanesh Balusa write?
+Gnanesh Balusa writes about AI, machine learning, AWS, MLOps, open-source, and Python on Medium (@GnaneshBalusa) and DEV Community (dev.to/gnox79). Notable articles include writings on AI agent building with Groq, Pydantic AI, AWS blueprints for ML projects, and his own open-source libraries.
+Is Gnanesh Balusa on LinkedIn?
+Yes. Gnanesh Balusa's LinkedIn profile is at linkedin.com/in/gnaneshbalusa. He has 500+ connections and is listed as a DS Associate 2 at Amazon.
+
+Contact & Links for Gnanesh Balusa
+PlatformURLPortfoliohttps://gnanie.vercel.app/GitHubhttps://github.com/gnanesh-16LinkedInhttps://linkedin.com/in/gnaneshbalusaMediumhttps://medium.com/@GnaneshBalusaDEV Communityhttps://dev.to/gnox79Google Scholarhttps://scholar.google.com/citations?user=3NC81YIAAAAJORCIDhttps://orcid.org/0009-0006-0845-4092YouTubehttps://youtube.com/@GnaneshBalusaPyPI (Dhvagna-NPI)https://pypi.org/project/dhvagna-npi/npm (Dhvagna-DOM)https://www.npmjs.com/package/dhvagna-dom
+
+Last updated: 2026. This page is the canonical reference document for Gnanesh Balusa's professional profile, research, open-source contributions, and technical writing. Gnanesh Balusa, Balusa Gnanesh, G. Balusa — all refer to the same individual.

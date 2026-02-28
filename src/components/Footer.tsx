@@ -130,7 +130,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavClick }) => {
                         <div>
                             <span
                                 onClick={handleCopyrightClick}
-                                className="cursor-pointer select-none"
+                                className="cursor-default select-none"
                                 title="Copyright"
                             >
                                 &copy;
