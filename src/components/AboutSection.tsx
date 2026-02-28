@@ -1,0 +1,361 @@
+import React from 'react';
+
+// Custom SVG Icons for Projects
+const ProjectIcons = {
+    React: () => (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="2.5" />
+            <ellipse cx="12" cy="12" rx="10" ry="4" />
+            <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" />
+            <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" />
+        </svg>
+    ),
+    Cursor: () => (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M5 3l14 9-6 1-3 6-5-16z" />
+            <path d="M14 14l5 5" strokeLinecap="round" />
+        </svg>
+    ),
+    Voice: () => (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="9" y="2" width="6" height="11" rx="3" />
+            <path d="M5 10v1a7 7 0 0014 0v-1" />
+            <path d="M12 18v4M8 22h8" strokeLinecap="round" />
+        </svg>
+    ),
+    Eye: () => (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+        </svg>
+    ),
+    Brain: () => (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 2a4 4 0 00-4 4v1a3 3 0 00-3 3v1a3 3 0 000 6v1a3 3 0 003 3h1a4 4 0 008 0h1a3 3 0 003-3v-1a3 3 0 000-6v-1a3 3 0 00-3-3V6a4 4 0 00-4-4z" />
+            <path d="M12 2v20M8 8h8M8 12h8M8 16h8" strokeLinecap="round" />
+        </svg>
+    ),
+    Pipeline: () => (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="2" y="3" width="6" height="6" rx="1" />
+            <rect x="16" y="3" width="6" height="6" rx="1" />
+            <rect x="9" y="15" width="6" height="6" rx="1" />
+            <path d="M5 9v3a3 3 0 003 3h1M19 9v3a3 3 0 01-3 3h-1" strokeLinecap="round" />
+        </svg>
+    ),
+    Trophy: () => (
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M6 9H3a1 1 0 01-1-1V5a1 1 0 011-1h3M18 9h3a1 1 0 001-1V5a1 1 0 00-1-1h-3" />
+            <path d="M6 4h12v6a6 6 0 11-12 0V4z" />
+            <path d="M12 16v3M8 22h8M8 19h8" strokeLinecap="round" />
+        </svg>
+    )
+};
+
+export const AboutSection: React.FC = () => {
+    const experiences = [
+        {
+            company: 'Amazon',
+            period: '2025 -',
+            role: 'DS Machine Learning Associate 2',
+            description: 'Building AI-powered solutions that translate complex data into measurable business outcomes. My work centers on developing systems that remain robust at scale while preserving the nuance required for real-world deployment.'
+        },
+        {
+            company: 'McKinsey & Company',
+            period: '2024 - 2025',
+            role: 'Business Analyst',
+            description: 'Guided cross-functional teams through data analysis initiatives that reshaped how the organization captures and interprets information. Applied structured problem-solving frameworks to inform executive strategy.'
+        },
+        {
+            company: 'TiHAN IIT Hyderabad',
+            period: '2024 - 2024',
+            role: 'AI Research Software Engineer',
+            description: 'Designed and implemented AI/ML systems with an emphasis on production readiness. Balanced research ambition with engineering pragmatism to deliver solutions that meet demanding performance requirements.'
+        },
+        {
+            company: 'Microsoft',
+            period: '2024 - 2024',
+            role: 'Microsoft Student Ambassador',
+            description: 'Led community initiatives that brought emerging technologies to peers through hands-on workshops and collaborative projects. Fostered an environment where curiosity and technical rigor could coexist.'
+        }
+    ];
+
+    const featuredWriting = [
+        { year: '2025', title: 'Your LLM Might Already Be Backdoored and You Dont Even Know It' },
+        { year: '2025', title: 'The 15 Git Commands Every Developer Needs to Join $2B+ Companies' },
+        { year: '2024', title: 'Cracking the Code: How I Mastered REST API Interviews at Amazon' },
+        { year: '2024', title: 'My Journey Learning React, Electron, and Building MuteMemo' },
+        { year: '2024', title: 'SOAP vs REST: Understanding the Differences' },
+        { year: '2023', title: 'The Hidden Algorithm That 90% of Software Engineers Miss' },
+        { year: '2023', title: 'Why 99% of AI Projects Fail And the AWS Blueprint to Save Yours' },
+        { year: '2022', title: 'Dhvagna-NPI: Lightweight English Speech Transcription for Developers' }
+    ];
+
+    const previousProjects = [
+        {
+            icon: ProjectIcons.Pipeline,
+            name: 'ML Pipeline Development',
+            year: '2026',
+            description: 'Scalable machine learning systems built for production environments—encompassing data preprocessing, model training, and deployment strategies for enterprise-grade reliability.'
+        },
+        {
+            icon: ProjectIcons.Cursor,
+            name: 'BrogsCursor',
+            year: '2025',
+            description: 'An open-source Python package enabling precise recording and replay of mouse movements, clicks, and keyboard inputs with pixel-perfect accuracy. No paid browser APIs—just straightforward automation for everyone.'
+        },
+        {
+            icon: ProjectIcons.React,
+            name: 'MuteMemo',
+            year: '2024',
+            description: 'An invisible overlay application for online meetings built with React and Electron. Enables seamless note-taking, action item tracking, and image capture—entirely hidden from screen sharing.'
+        },
+        {
+            icon: ProjectIcons.Eye,
+            name: 'Computer Vision Applications',
+            year: '2024',
+            description: 'Production implementations including object detection, image classification, and real-time processing systems. Demonstrates practical applications of deep learning in visual recognition.'
+        },
+        {
+            icon: ProjectIcons.Voice,
+            name: 'Speech Emotion Recognition',
+            year: '2023',
+            description: 'A deep learning system for temporal sequence analysis in detecting human emotions from speech patterns. Applications span human-computer interaction and mental health monitoring.'
+        },
+        {
+            icon: ProjectIcons.Brain,
+            name: 'NLP Solutions',
+            year: '2023',
+            description: 'Natural language processing projects focusing on text analysis, sentiment detection, and language model applications. Showcases advanced techniques in processing and understanding human language.'
+        },
+        {
+            icon: ProjectIcons.Trophy,
+            name: 'Hackathon Winning Solutions',
+            year: '2023',
+            description: 'A collection of innovative projects that secured victories across multiple hackathons. Demonstrates rapid prototyping capabilities and creative problem-solving across AI, web, and mobile domains.'
+        }
+    ];
+
+    const patents = [
+        {
+            year: '2024',
+            title: 'MuteMemo: Invisible Overlay System for Real-Time Meeting Annotation',
+            description: 'A novel system enabling real-time note-taking during video conferences with complete invisibility to screen sharing protocols.'
+        }
+    ];
+
+    const publications = [
+        {
+            year: '2025',
+            title: 'Comparative Analysis of Different Operational Logic Gates for Cutting-Edge Technology',
+            description: 'Published in IEEE. Authored with Vijay Rao Kumbhare, Tallam Sai Nithin, M Sahil Krishna, Ashwini Kumar Varma, Bittu Kumar.'
+        },
+        {
+            year: '2024',
+            title: 'Evaluating Gesture Based Text Generator Gloves System on Arduino Platform',
+            description: 'Published in IEEE Gujarat. Authored with Vijay Rao Kumbhare, Bittu Kumar, Amit Kumar Shrivastava, Ashwini Kumar Varma, Aditya Japa.'
+        }
+    ];
+
+    return (
+        <>
+            {/* About Hero Section */}
+            <section id="about" className="py-32 border-t border-[#e5e5e5] dark:border-zinc-800">
+                <div className="max-w-[1200px] mx-auto px-6">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-12">
+                        {/* Profile Image - Left */}
+                        <div className="md:w-[45%]">
+                            <div className="relative group cursor-pointer">
+                                <div className="relative w-full aspect-square max-w-[380px] overflow-hidden rounded-lg">
+                                    <img
+                                        src="/brand-assets/gnaneshbalusaprofileamazon_webp.webp"
+                                        alt="Gnanesh Balusa"
+                                        className="w-full h-[130%] object-cover object-[center_15%] grayscale group-hover:grayscale-0 transition-all duration-500"
+                                        loading="eager"
+                                        decoding="async"
+                                        width="380"
+                                        height="494"
+                                    />
+                                    {/* Dotted overlay - dark mode */}
+                                    <div
+                                        className="absolute inset-0 pointer-events-none transition-opacity duration-500 group-hover:opacity-0 hidden dark:block"
+                                        style={{
+                                            backgroundImage: `radial-gradient(circle, rgba(19, 19, 19, 0.9) 0.8px, transparent 0.8px)`,
+                                            backgroundSize: '3px 3px',
+                                            backgroundColor: 'rgba(19, 19, 19, 0.2)'
+                                        }}
+                                    />
+                                    {/* Light mode dotted overlay */}
+                                    <div
+                                        className="absolute inset-0 pointer-events-none transition-opacity duration-500 group-hover:opacity-0 dark:hidden"
+                                        style={{
+                                            backgroundImage: `radial-gradient(circle, rgba(253, 251, 247, 0.9) 0.8px, transparent 0.8px)`,
+                                            backgroundSize: '3px 3px',
+                                            backgroundColor: 'rgba(253, 251, 247, 0.2)'
+                                        }}
+                                    />
+                                </div>
+                                <div className="mt-4 text-sm text-[#666] dark:text-[#999] font-medium">
+                                    Gnanesh Balusa
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* About Text - Right */}
+                        <div className="md:w-1/2 space-y-6">
+                            <h2 className="text-6xl md:text-7xl font-bold tracking-tight text-[#1a1a1a] dark:text-[#f0f0f0]">
+                                About
+                            </h2>
+                            <p className="text-xl md:text-2xl font-medium leading-relaxed text-[#1a1a1a] dark:text-[#f0f0f0] opacity-90">
+                                I build AI systems that understand, adapt, and scale. With over two years of experience spanning Amazon, McKinsey, and academic research at IIT Hyderabad, my work focuses on the intersection of machine learning infrastructure and real-world deployment.
+                            </p>
+                            <div className="flex flex-wrap gap-4 text-sm font-medium pt-2">
+                                <span className="text-[#666] dark:text-[#999]">Focus Areas:</span>
+                                {['Machine Learning', 'Full Stack Development', 'AI Research', 'System Reliability'].map((area) => (
+                                    <span key={area} className="text-[#1a1a1a] dark:text-[#a0a0a0]">
+                                        {area}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div className="max-w-[1200px] mx-auto px-6">
+                <div className="border-t border-[#e5e5e5] dark:border-zinc-800"></div>
+            </div>
+
+            {/* Experience Section */}
+            <section id="experience" className="py-24">
+                <div className="max-w-[1200px] mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-12">Experience</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                        {experiences.map((exp, index) => (
+                            <div key={index} className="space-y-4">
+                                <div className="text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase">
+                                    {exp.period}
+                                </div>
+                                <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0]">{exp.company}</h3>
+                                <div className="text-sm font-medium text-[#444] dark:text-[#b0b0b0]">{exp.role}</div>
+                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
+                                    {exp.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            <div className="max-w-[1200px] mx-auto px-6">
+                <div className="border-t border-[#e5e5e5] dark:border-zinc-800"></div>
+            </div>
+
+            {/* Featured Writing */}
+            <section className="py-24">
+                <div className="max-w-[1200px] mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-12">Featured Writing</h2>
+                    <div className="space-y-4">
+                        {featuredWriting.map((article, index) => (
+                            <div key={index} className="flex items-baseline gap-4 group cursor-pointer">
+                                <span className="text-sm font-medium text-[#666] dark:text-[#999] min-w-[50px]">
+                                    {article.year}
+                                </span>
+                                <span className="text-[#1a1a1a] dark:text-[#f0f0f0] group-hover:underline decoration-1 underline-offset-4 transition-all">
+                                    {article.title}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            <div className="max-w-[1200px] mx-auto px-6">
+                <div className="border-t border-[#e5e5e5] dark:border-zinc-800"></div>
+            </div>
+
+            {/* Previous Projects */}
+            <section id="projects" className="py-24">
+                <div className="max-w-[1200px] mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-12">Previous Projects</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                        {previousProjects.map((project, index) => (
+                            <div key={index} className="space-y-4 group cursor-pointer">
+                                <div className="text-[#555] dark:text-[#a0a0a0] group-hover:text-[#1a1a1a] dark:group-hover:text-[#f0f0f0] transition-colors">
+                                    <project.icon />
+                                </div>
+                                <div className="flex items-baseline gap-3">
+                                    <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] group-hover:underline decoration-1 underline-offset-4">
+                                        {project.name}
+                                    </h3>
+                                    <span className="text-xs font-medium text-[#666] dark:text-[#999]">
+                                        {project.year}
+                                    </span>
+                                </div>
+                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
+                                    {project.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            <div className="max-w-[1200px] mx-auto px-6">
+                <div className="border-t border-[#e5e5e5] dark:border-zinc-800"></div>
+            </div>
+
+            {/* Patents and Publications */}
+            <section id="publications" className="py-24">
+                <div className="max-w-[1200px] mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-12">Patents and Publications</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Patents Column */}
+                        <div>
+                            <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-6 pb-3 border-b border-[#e5e5e5] dark:border-zinc-800">
+                                Patents
+                            </h3>
+                            <div className="space-y-6">
+                                {patents.map((patent, index) => (
+                                    <div key={index} className="space-y-2">
+                                        <div className="text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase">
+                                            {patent.year}
+                                        </div>
+                                        <h4 className="text-base font-bold text-[#1a1a1a] dark:text-[#f0f0f0]">
+                                            {patent.title}
+                                        </h4>
+                                        <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
+                                            {patent.description}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Publications Column */}
+                        <div>
+                            <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-6 pb-3 border-b border-[#e5e5e5] dark:border-zinc-800">
+                                Publications
+                            </h3>
+                            <div className="space-y-6">
+                                {publications.map((pub, index) => (
+                                    <div key={index} className="space-y-2">
+                                        <div className="text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase">
+                                            {pub.year}
+                                        </div>
+                                        <h4 className="text-base font-bold text-[#1a1a1a] dark:text-[#f0f0f0]">
+                                            {pub.title}
+                                        </h4>
+                                        <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
+                                            {pub.description}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </>
+    );
+};
