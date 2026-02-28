@@ -62,35 +62,47 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
                 </div>
 
                 {/* Hamburger for Mobile */}
-                <button
-                    className="md:hidden ml-auto flex items-center justify-center p-2 rounded focus:outline-none"
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label="Open menu"
-                    style={{ position: 'absolute', right: 24 }}
-                >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#1a1a1a] dark:text-[#f0f0f0]">
-                        <line x1="3" y1="12" x2="21" y2="12" />
-                        <line x1="3" y1="6" x2="21" y2="6" />
-                        <line x1="3" y1="18" x2="21" y2="18" />
-                    </svg>
-                </button>
+                <div className="md:hidden ml-auto flex items-center gap-4" style={{ position: 'absolute', right: 24 }}>
+                    <div className="relative">
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            aria-label="Contact Me"
+                            className="flex items-center justify-center p-2 rounded focus:outline-none text-[15px] font-bold text-[#1a1a1a] dark:text-[#f0f0f0] bg-transparent"
+                        >
+                            Contact Me
+                            <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        {mobileMenuOpen && (
+                            <div className="absolute right-0 mt-2 w-80 rounded-lg shadow-lg border border-[#e5e5e5] dark:border-zinc-800 p-4 z-50 bg-[#131313]">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Icons.GitHub className="w-6 h-6 text-[#f0f0f0]" />
+                                    <span className="font-medium text-[#f0f0f0]">gnanesh-16</span>
+                                </div>
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Icons.LinkedIn className="w-6 h-6 text-[#f0f0f0]" />
+                                    <span className="font-medium text-[#f0f0f0]">gnaneshbalusa</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Type here..."
+                                        className="flex-1 px-2 py-1 rounded border border-[#e5e5e5] dark:border-zinc-800 bg-[#191919] text-[#f0f0f0]"
+                                    />
+                                    <button className="p-2 rounded bg-[#191919] hover:bg-[#111] transition-colors">
+                                        <svg width="12" height="12" fill="none" stroke="#f0f0f0" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                            <path d="M22 2L11 13" />
+                                            <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+                                            <circle cx="19" cy="5" r="1" fill="#f0f0f0" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </header>
             {/* Mobile Menu */}
-            {mobileMenuOpen && (
-                <div className="md:hidden fixed top-16 left-0 right-0 bg-[#FBF9F6] dark:bg-[#131313] border-t border-[#e5e5e5] dark:border-zinc-800 px-6 py-4 z-50 shadow-lg">
-                    <nav className="flex flex-col gap-4 text-[15px] font-medium text-[#5f5f5f] dark:text-[#a0a0a0]">
-                        {[{ label: 'About', id: 'about' },{ label: 'Experience', id: 'experience' },{ label: 'Projects', id: 'projects' },{ label: 'Publications', id: 'publications' }].map(item => (
-                            <button
-                                key={item.id}
-                                onClick={() => { scrollToSection(item.id); setMobileMenuOpen(false); }}
-                                className="text-left hover:text-[#1a1a1a] dark:hover:text-white transition-colors py-2"
-                            >
-                                {item.label}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-            )}
+            {/* Mobile menu navigation removed as requested */}
         </div>
     );
 };

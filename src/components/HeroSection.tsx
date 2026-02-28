@@ -50,27 +50,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onAboutClick }) => {
                         <img
                             src="/brand-assets/portfolio-gnaneshbalusa-amazon.jpg"
                             alt="Gnanesh Balusa"
-                            className="w-full h-[130%] object-cover object-[center_15%] grayscale group-hover:grayscale-0 transition-all duration-500"
+                            className="w-full h-[130%] object-cover object-[center_15%]"
                             loading="eager"
                             decoding="async"
                             width="500"
                             height="650"
-                        />
-                        <div
-                            className="absolute inset-0 pointer-events-none transition-opacity duration-500 group-hover:opacity-0 hidden dark:block"
-                            style={{
-                                backgroundImage: `radial-gradient(circle, rgba(19, 19, 19, 0.9) 0.8px, transparent 0.8px)`,
-                                backgroundSize: '3px 3px',
-                                backgroundColor: 'rgba(19, 19, 19, 0.2)'
-                            }}
-                        />
-                        <div
-                            className="absolute inset-0 pointer-events-none transition-opacity duration-500 group-hover:opacity-0 dark:hidden"
-                            style={{
-                                backgroundImage: `radial-gradient(circle, rgba(253, 251, 247, 0.9) 0.8px, transparent 0.8px)`,
-                                backgroundSize: '3px 3px',
-                                backgroundColor: 'rgba(253, 251, 247, 0.2)'
-                            }}
                         />
                     </div>
                 </div>

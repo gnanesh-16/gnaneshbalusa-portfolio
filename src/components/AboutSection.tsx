@@ -178,10 +178,21 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                         <div className="md:w-[45%]">
                             <div className="relative group cursor-pointer">
                                 <div className="relative w-full aspect-square max-w-[380px] overflow-hidden rounded-lg">
+                                    {/* Desktop image */}
+                                    <img
+                                        src="/brand-assets/gnaneshbalusaprofileamazon_webp.webp"
+                                        alt="Gnanesh Balusa"
+                                        className="hidden md:block w-full h-[130%] object-cover object-[center_15%]"
+                                        loading="eager"
+                                        decoding="async"
+                                        width="380"
+                                        height="494"
+                                    />
+                                    {/* Mobile image */}
                                     <img
                                         src="/brand-assets/portfolio-gnaneshbalusa-amazon.jpg"
                                         alt="Gnanesh Balusa"
-                                        className="w-full h-[130%] object-cover object-[center_15%] grayscale group-hover:grayscale-0 transition-all duration-500"
+                                        className="md:hidden w-full h-[130%] object-cover object-[center_15%]"
                                         loading="eager"
                                         decoding="async"
                                         width="380"
@@ -269,25 +280,28 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                         {experiences.map((exp, index) => (
                             <div
                                 key={index}
-                                className="group bg-[#faf7f2] dark:bg-[#191919] rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-200 p-6 flex flex-col items-center text-center border border-[#ece7e0] dark:border-[#232323]"
+                                className="group bg-gradient-to-br from-[#faf7f2] via-[#f5e9d7] to-[#f0e6d2] dark:from-[#191919] dark:via-[#232323] dark:to-[#191919] rounded-2xl shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-7 flex flex-col items-center text-center border border-[#ece7e0] dark:border-[#232323]"
                             >
                                 <div className="flex flex-col items-center mb-4">
                                     <img
                                         src={exp.logo}
                                         alt={`${exp.company} logo`}
-                                        className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-contain mb-2 drop-shadow-sm"
+                                        className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-contain mb-2 drop-shadow-md"
                                     />
                                     <h3 className="text-2xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] group-hover:text-[#2d2d2d] dark:group-hover:text-white transition-colors">
                                         {exp.company}
                                     </h3>
                                 </div>
-                                <div className="text-xs font-semibold text-[#a08c6b] dark:text-[#b0b0b0] tracking-wide uppercase mb-2">
-                                    {exp.period}
+                                <div className="w-full flex flex-col items-center">
+                                    <div className="text-xs font-semibold text-[#a08c6b] dark:text-[#b0b0b0] tracking-wide uppercase mb-2">
+                                        {exp.period}
+                                    </div>
+                                    <div className="w-8 h-[2px] bg-[#ece7e0] dark:bg-[#232323] rounded-full mb-2"></div>
+                                    <div className="text-base font-medium text-[#444] dark:text-[#b0b0b0] mb-2">
+                                        {exp.role}
+                                    </div>
                                 </div>
-                                <div className="text-base font-medium text-[#444] dark:text-[#b0b0b0] mb-2">
-                                    {exp.role}
-                                </div>
-                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0] opacity-90">
+                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0] opacity-90 mt-2">
                                     {exp.description}
                                 </p>
                             </div>
