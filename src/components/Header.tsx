@@ -25,7 +25,6 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
             <header className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-3 cursor-pointer group" onClick={() => scrollToSection('hero')}>
-                        <img src="/brand-assets/favicon.png" alt="Logo" className="w-8 h-8 rounded-sm opacity-90 group-hover:opacity-100 transition-opacity mix-blend-multiply dark:mix-blend-normal" />
                         <div className="text-[16px] font-bold tracking-tight text-[#1a1a1a] dark:text-[#f0f0f0]">
                             Gnanesh Balusa
                         </div>

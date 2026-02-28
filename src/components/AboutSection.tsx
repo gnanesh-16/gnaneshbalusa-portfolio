@@ -241,7 +241,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
             <section id="experience" className="py-24">
                 <div className="max-w-[1200px] mx-auto px-6">
                     <h2 className="text-3xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-12">Experience</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                    {/* Mobile: previous layout */}
+                    <div className="grid grid-cols-1 gap-y-12 md:hidden">
                         {experiences.map((exp, index) => (
                             <div key={index} className="space-y-4">
                                 <div className="text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase">
@@ -257,6 +258,36 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                                 </div>
                                 <div className="text-sm font-medium text-[#444] dark:text-[#b0b0b0]">{exp.role}</div>
                                 <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
+                                    {exp.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop: new card design */}
+                    <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                        {experiences.map((exp, index) => (
+                            <div
+                                key={index}
+                                className="group bg-[#faf7f2] dark:bg-[#191919] rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-200 p-6 flex flex-col items-center text-center border border-[#ece7e0] dark:border-[#232323]"
+                            >
+                                <div className="flex flex-col items-center mb-4">
+                                    <img
+                                        src={exp.logo}
+                                        alt={`${exp.company} logo`}
+                                        className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-contain mb-2 drop-shadow-sm"
+                                    />
+                                    <h3 className="text-2xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] group-hover:text-[#2d2d2d] dark:group-hover:text-white transition-colors">
+                                        {exp.company}
+                                    </h3>
+                                </div>
+                                <div className="text-xs font-semibold text-[#a08c6b] dark:text-[#b0b0b0] tracking-wide uppercase mb-2">
+                                    {exp.period}
+                                </div>
+                                <div className="text-base font-medium text-[#444] dark:text-[#b0b0b0] mb-2">
+                                    {exp.role}
+                                </div>
+                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0] opacity-90">
                                     {exp.description}
                                 </p>
                             </div>
