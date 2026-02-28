@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { Icons } from './Icons';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+    onAboutClick?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onAboutClick }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const scrollToSection = (id: string) => {
         setMobileMenuOpen(false);
+        if (id === 'about') {
+            onAboutClick?.();
+            return;
+        }
         const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });

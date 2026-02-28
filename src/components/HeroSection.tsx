@@ -1,8 +1,12 @@
 import React from 'react';
-import { Icons } from './Icons';
 
-export const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+    onAboutClick?: () => void;
+}
+
+export const HeroSection: React.FC<HeroSectionProps> = ({ onAboutClick }) => {
     const scrollToAbout = () => {
+        onAboutClick?.();
         const element = document.getElementById('about');
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
@@ -39,59 +43,37 @@ export const HeroSection: React.FC = () => {
                 </div>
             </div>
 
-            {/* Hero Illustration - Fibonacci SVG */}
+            {/* Hero Image */}
             <div className="relative h-[500px] w-full flex items-center justify-center animate-in fade-in duration-1000 delay-200">
-                <style>
-                    {`
-                        @keyframes tentacle-float {
-                            0%, 100% { transform: translateY(0); }
-                            50% { transform: translateY(-30px); }
-                        }
-                        .animate-tentacle {
-                            animation: tentacle-float 6s ease-in-out infinite;
-                        }
-                        @media (min-width: 768px) {
-                            .animate-tentacle {
-                                animation: none;
-                            }
-                        }
-                    `}
-                </style>
-
-                <svg viewBox="0 0 500 500" className="w-full h-full max-w-[500px] drop-shadow-sm relative z-10">
-                    {/* Main Body - Static */}
-                    <path
-                        d="M220 280 C 220 250, 240 230, 270 230 C 310 230, 310 290, 270 310 C 210 340, 160 250, 220 200 C 300 140, 380 250, 320 350"
-                        className="stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[8px] fill-none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-
-                    {/* Staggered Floating Tentacles */}
-                    <g className="animate-tentacle" style={{ animationDelay: '0s' }}>
-                        <path d="M160 250 L 100 200" className="stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[8px] fill-none" strokeLinecap="round" strokeLinejoin="round" />
-                        <circle cx="100" cy="200" r="10" className="fill-[#FBF9F6] dark:fill-[#131313] stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[6px]" />
-                    </g>
-
-                    <g className="animate-tentacle" style={{ animationDelay: '1s' }}>
-                        <path d="M220 200 L 180 120" className="stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[8px] fill-none" strokeLinecap="round" strokeLinejoin="round" />
-                        <circle cx="180" cy="120" r="10" className="fill-[#FBF9F6] dark:fill-[#131313] stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[6px]" />
-                    </g>
-
-                    <g className="animate-tentacle" style={{ animationDelay: '0.5s' }}>
-                        <path d="M300 140 L 350 80" className="stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[8px] fill-none" strokeLinecap="round" strokeLinejoin="round" />
-                        <circle cx="350" cy="80" r="10" className="fill-[#FBF9F6] dark:fill-[#131313] stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[6px]" />
-                    </g>
-
-                    <g className="animate-tentacle" style={{ animationDelay: '1.5s' }}>
-                        <path d="M380 250 L 440 220" className="stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[8px] fill-none" strokeLinecap="round" strokeLinejoin="round" />
-                        <circle cx="440" cy="220" r="10" className="fill-[#FBF9F6] dark:fill-[#131313] stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[6px]" />
-                    </g>
-
-                    {/* Spiral Terminals - Static center nodes */}
-                    <circle cx="220" cy="280" r="8" className="fill-[#1a1a1a] dark:fill-[#f0f0f0]" />
-                    <circle cx="320" cy="350" r="12" className="fill-[#FBF9F6] dark:fill-[#131313] stroke-[#1a1a1a] dark:stroke-[#f0f0f0] stroke-[6px]" />
-                </svg>
+                <div className="relative group cursor-pointer w-full max-w-[500px]">
+                    <div className="relative w-full aspect-square overflow-hidden rounded-lg">
+                        <img
+                            src="/brand-assets/gnaneshbalusaprofileamazon_webp.webp"
+                            alt="Gnanesh Balusa"
+                            className="w-full h-[130%] object-cover object-[center_15%] grayscale group-hover:grayscale-0 transition-all duration-500"
+                            loading="eager"
+                            decoding="async"
+                            width="500"
+                            height="650"
+                        />
+                        <div
+                            className="absolute inset-0 pointer-events-none transition-opacity duration-500 group-hover:opacity-0 hidden dark:block"
+                            style={{
+                                backgroundImage: `radial-gradient(circle, rgba(19, 19, 19, 0.9) 0.8px, transparent 0.8px)`,
+                                backgroundSize: '3px 3px',
+                                backgroundColor: 'rgba(19, 19, 19, 0.2)'
+                            }}
+                        />
+                        <div
+                            className="absolute inset-0 pointer-events-none transition-opacity duration-500 group-hover:opacity-0 dark:hidden"
+                            style={{
+                                backgroundImage: `radial-gradient(circle, rgba(253, 251, 247, 0.9) 0.8px, transparent 0.8px)`,
+                                backgroundSize: '3px 3px',
+                                backgroundColor: 'rgba(253, 251, 247, 0.2)'
+                            }}
+                        />
+                    </div>
+                </div>
             </div>
         </section>
     );

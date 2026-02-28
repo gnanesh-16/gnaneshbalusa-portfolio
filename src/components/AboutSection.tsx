@@ -1,5 +1,9 @@
 import React from 'react';
 
+interface AboutSectionProps {
+    showAboutHeroDesktop?: boolean;
+}
+
 // Custom SVG Icons for Projects
 const ProjectIcons = {
     React: () => (
@@ -52,7 +56,7 @@ const ProjectIcons = {
     )
 };
 
-export const AboutSection: React.FC = () => {
+export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop = true }) => {
     const experiences = [
         {
             company: 'Amazon',
@@ -164,7 +168,10 @@ export const AboutSection: React.FC = () => {
     return (
         <>
             {/* About Hero Section */}
-            <section id="about" className="py-32 border-t border-[#e5e5e5] dark:border-zinc-800">
+            <section
+                id="about"
+                className={`${showAboutHeroDesktop ? 'block' : 'md:hidden'} py-32 border-t border-[#e5e5e5] dark:border-zinc-800`}
+            >
                 <div className="max-w-[1200px] mx-auto px-6">
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-12">
                         {/* Profile Image - Left */}
