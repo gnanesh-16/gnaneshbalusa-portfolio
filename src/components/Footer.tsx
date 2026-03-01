@@ -100,6 +100,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavClick }) => {
                             <button onClick={() => scrollToSection('publications')} className="hover:text-[#1a1a1a] dark:hover:text-white transition-colors">
                                 Publications
                             </button>
+                            <button onClick={() => scrollToSection('videos')} className="hover:text-[#1a1a1a] dark:hover:text-white transition-colors">
+                                Talks
+                            </button>
                         </div>
 
                         {/* Social Icons */}

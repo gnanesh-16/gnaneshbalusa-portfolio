@@ -5,7 +5,7 @@ import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { Icons } from '../components/Icons';
 
-type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Deleted' | 'ExportImport' | 'Analytics';
+type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Videos' | 'Deleted' | 'ExportImport' | 'Analytics';
 
 // --- Generic Data List Component ---
 const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
@@ -67,6 +67,17 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
             fields = [
                 { name: 'title', label: 'Title' },
                 { name: 'year', label: 'Year' },
+                { name: 'description', label: 'Description' },
+                { name: 'order', label: 'Order', type: 'number' }
+            ];
+            break;
+        case 'Videos':
+            getQuery = api.portfolio.getVideos;
+            saveMut = api.portfolio.saveVideo;
+            delMut = api.portfolio.softDeleteVideo;
+            fields = [
+                { name: 'title', label: 'Title' },
+                { name: 'url', label: 'YouTube URL' },
                 { name: 'description', label: 'Description' },
                 { name: 'order', label: 'Order', type: 'number' }
             ];
@@ -269,7 +280,7 @@ export const Dashboard: React.FC = () => {
                 </div>
 
                 <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-2">
-                    {(['Experiences', 'Writings', 'Projects', 'Patents', 'Publications'] as Tab[]).map((tab) => {
+                    {(['Experiences', 'Writings', 'Projects', 'Patents', 'Publications', 'Videos'] as Tab[]).map((tab) => {
                         let IconComponent;
                         switch (tab) {
                             case 'Experiences': IconComponent = Icons.Briefcase; break;
@@ -277,6 +288,7 @@ export const Dashboard: React.FC = () => {
                             case 'Projects': IconComponent = Icons.Code; break;
                             case 'Patents': IconComponent = Icons.Award; break;
                             case 'Publications': IconComponent = Icons.BookOpen; break;
+                            case 'Videos': IconComponent = Icons.YouTube; break;
                             default: IconComponent = Icons.Layers;
                         }
 
@@ -387,6 +399,7 @@ const AnalyticsView: React.FC<{ token: string }> = ({ token }) => {
         { label: 'Projects', count: allData?.projects.length || 0 },
         { label: 'Patents', count: allData?.patents.length || 0 },
         { label: 'Publications', count: allData?.publications.length || 0 },
+        { label: 'Videos', count: allData?.videos?.length || 0 },
     ];
 
     const total = stats.reduce((acc, curr) => acc + curr.count, 0);
@@ -510,6 +523,7 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
     const deletedProjects = useQuery(api.portfolio.getDeletedProjects) || [];
     const deletedPatents = useQuery(api.portfolio.getDeletedPatents) || [];
     const deletedPublications = useQuery(api.portfolio.getDeletedPublications) || [];
+    const deletedVideos = useQuery(api.portfolio.getDeletedVideos) || [];
 
     const restoreExp = useMutation(api.portfolio.restoreExperience);
     const hardDelExp = useMutation(api.portfolio.hardDeleteExperience);
@@ -521,6 +535,8 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
     const hardDelPat = useMutation(api.portfolio.hardDeletePatent);
     const restorePub = useMutation(api.portfolio.restorePublication);
     const hardDelPub = useMutation(api.portfolio.hardDeletePublication);
+    const restoreVid = useMutation(api.portfolio.restoreVideo);
+    const hardDelVid = useMutation(api.portfolio.hardDeleteVideo);
 
     const [deleteClicks, setDeleteClicks] = useState<Record<string, number>>({});
 
@@ -531,6 +547,7 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
             case 'Projects': await restoreProj({ token, id: id as any }); break;
             case 'Patents': await restorePat({ token, id: id as any }); break;
             case 'Publications': await restorePub({ token, id: id as any }); break;
+            case 'Videos': await restoreVid({ token, id: id as any }); break;
         }
     };
 
@@ -544,6 +561,7 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
                 case 'Projects': await hardDelProj({ token, id: id as any }); break;
                 case 'Patents': await hardDelPat({ token, id: id as any }); break;
                 case 'Publications': await hardDelPub({ token, id: id as any }); break;
+                case 'Videos': await hardDelVid({ token, id: id as any }); break;
             }
             const newClicks = { ...deleteClicks };
             delete newClicks[id];
@@ -565,7 +583,8 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
         ...deletedWritings.map(i => ({ ...i, type: 'Writings' })),
         ...deletedProjects.map(i => ({ ...i, type: 'Projects' })),
         ...deletedPatents.map(i => ({ ...i, type: 'Patents' })),
-        ...deletedPublications.map(i => ({ ...i, type: 'Publications' }))
+        ...deletedPublications.map(i => ({ ...i, type: 'Publications' })),
+        ...deletedVideos.map(i => ({ ...i, type: 'Videos' }))
     ].sort((a, b) => b._creationTime - a._creationTime);
 
     return (

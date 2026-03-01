@@ -39,4 +39,11 @@ export default defineSchema({
         order: v.number(),
         isDeleted: v.optional(v.boolean()),
     }),
+    videos: defineTable({
+        title: v.string(),
+        url: v.string(),
+        description: v.string(),
+        order: v.number(),
+        isDeleted: v.optional(v.boolean()),
+    }),
 });

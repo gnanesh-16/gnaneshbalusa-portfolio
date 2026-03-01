@@ -7,6 +7,7 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
+import { VideosSection } from './components/VideosSection';
 import { ResumeViewer } from './components/ResumeViewer';
 import { ScrollButton } from './components/ScrollButton';
 import { ReactLenis } from 'lenis/react';
@@ -44,6 +45,7 @@ const MainPortfolio: React.FC = () => {
                         <>
                             <HeroSection onAboutClick={handleAboutClick} onResumeClick={() => setIsResumeOpen(true)} />
                             <AboutSection showAboutHeroDesktop={showAboutDesktop} onResumeClick={() => setIsResumeOpen(true)} />
+                            <VideosSection />
                         </>
                     )}
                     <Footer onNavClick={() => setIsResumeOpen(false)} />

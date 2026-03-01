@@ -50,6 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
                             { label: 'Experience', id: 'experience' },
                             { label: 'Projects', id: 'projects' },
                             { label: 'Publications', id: 'publications' },
+                            { label: 'Talks', id: 'videos' },
                         ].map(item => (
                             <button
                                 key={item.id}

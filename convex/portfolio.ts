@@ -261,6 +261,69 @@ export const restorePatent = mutation({
     }
 });
 
+// --- Videos ---
+export const getVideos = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("videos")
+            .filter((q) => q.neq(q.field("isDeleted"), true))
+            .collect();
+        return items.sort((a, b) => a.order - b.order);
+    }
+});
+
+export const getDeletedVideos = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("videos")
+            .filter((q) => q.eq(q.field("isDeleted"), true))
+            .collect();
+        return items;
+    }
+});
+
+export const saveVideo = mutation({
+    args: {
+        token: v.string(),
+        id: v.optional(v.id("videos")),
+        title: v.string(),
+        url: v.string(),
+        description: v.string(),
+        order: v.number()
+    },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        const { token, id, ...data } = args;
+        if (id) {
+            await ctx.db.patch(id, data);
+            return id;
+        }
+        return await ctx.db.insert("videos", data);
+    }
+});
+
+export const softDeleteVideo = mutation({
+    args: { token: v.string(), id: v.id("videos") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: true });
+    }
+});
+
+export const hardDeleteVideo = mutation({
+    args: { token: v.string(), id: v.id("videos") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.delete(args.id);
+    }
+});
+
+export const restoreVideo = mutation({
+    args: { token: v.string(), id: v.id("videos") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: false });
+    }
+});
+
 // --- Publications ---
 export const getPublications = query({
     handler: async (ctx) => {
@@ -395,11 +458,16 @@ export const seedData = mutation({
             { year: '2024', title: 'Evaluating Gesture Based Text Generator Gloves System on Arduino Platform', description: 'Published in IEEE Gujarat. Authored with Vijay Rao Kumbhare, Bittu Kumar, Amit Kumar Shrivastava, Ashwini Kumar Varma, Aditya Japa.', order: 2 }
         ];
 
+        const videos = [
+            { title: 'Build AI Agents with Groq', url: 'https://youtube.com/watch?v=dQw4w9WgXcQ', description: 'A complete tutorial on building blazing fast LLM agents.', order: 1 }
+        ];
+
         for (const e of experiences) await ctx.db.insert("experiences", e);
         for (const w of writings) await ctx.db.insert("writings", w);
         for (const p of projects) await ctx.db.insert("projects", p);
         for (const p of patents) await ctx.db.insert("patents", p);
         for (const p of publications) await ctx.db.insert("publications", p);
+        for (const v of videos) await ctx.db.insert("videos", v);
 
         return "Seeded successfully";
     }
@@ -413,13 +481,15 @@ export const getAllData = query({
         const projects = await ctx.db.query("projects").collect();
         const patents = await ctx.db.query("patents").collect();
         const publications = await ctx.db.query("publications").collect();
+        const videos = await ctx.db.query("videos").collect();
 
         return {
             experiences,
             writings,
             projects,
             patents,
-            publications
+            publications,
+            videos
         };
     }
 });
@@ -433,6 +503,7 @@ export const importData = mutation({
             projects: v.optional(v.array(v.any())),
             patents: v.optional(v.array(v.any())),
             publications: v.optional(v.array(v.any())),
+            videos: v.optional(v.array(v.any())),
         })
     },
     handler: async (ctx, args) => {
@@ -467,6 +538,12 @@ export const importData = mutation({
             for (const item of data.publications) {
                 const { _id, _creationTime, ...fields } = item;
                 await ctx.db.insert("publications", fields as any);
+            }
+        }
+        if (data.videos) {
+            for (const item of data.videos) {
+                const { _id, _creationTime, ...fields } = item;
+                await ctx.db.insert("videos", fields as any);
             }
         }
 
