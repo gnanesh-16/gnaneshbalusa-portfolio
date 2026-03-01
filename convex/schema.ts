@@ -46,4 +46,8 @@ export default defineSchema({
         order: v.number(),
         isDeleted: v.optional(v.boolean()),
     }),
+    settings: defineTable({
+        key: v.string(),
+        value: v.any(),
+    }),
 });

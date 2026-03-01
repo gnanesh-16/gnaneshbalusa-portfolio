@@ -5,7 +5,7 @@ import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { Icons } from '../components/Icons';
 
-type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Videos' | 'Deleted' | 'ExportImport' | 'Analytics';
+type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Videos' | 'Deleted' | 'ExportImport' | 'Analytics' | 'Settings';
 
 // --- Generic Data List Component ---
 const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
@@ -107,6 +107,13 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
         }
     };
 
+    const handleAddClick = () => {
+        const nextOrder = Math.max(...items.map((i: any) => i.order || 0), 0) + 1;
+        setFormData({ order: nextOrder });
+        setIsAdding(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const handleEdit = (item: any) => {
         setFormData(item);
         setEditingId(item._id);
@@ -152,7 +159,7 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
             <div className="flex justify-between items-center bg-[#F5F5F7] dark:bg-[#1C1C1E] p-4 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A]">
                 <h3 className="font-semibold text-lg">{tab} List</h3>
                 <button
-                    onClick={isAdding ? handleCancel : () => setIsAdding(true)}
+                    onClick={isAdding ? handleCancel : handleAddClick}
                     className="px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white rounded-full text-sm font-medium transition-colors"
                 >
                     {isAdding ? 'Cancel' : 'Add New'}
@@ -180,8 +187,9 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
                                         type={f.type || 'text'}
                                         value={formData[f.name] || ''}
                                         onChange={e => setFormData({ ...formData, [f.name]: f.type === 'number' ? Number(e.target.value) : e.target.value })}
-                                        className="w-full h-12 bg-[#F5F5F7] dark:bg-[#2C2C2E] border border-[#D2D2D7] dark:border-[#38383A] rounded-xl px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0066CC]"
+                                        className={`w-full h-12 bg-[#F5F5F7] dark:bg-[#2C2C2E] border border-[#D2D2D7] dark:border-[#38383A] rounded-xl px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0066CC] ${f.name === 'order' ? 'opacity-60 cursor-not-allowed' : ''}`}
                                         required
+                                        readOnly={f.name === 'order'}
                                     />
                                 )}
                             </div>
@@ -336,6 +344,17 @@ export const Dashboard: React.FC = () => {
                         <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} truncate`}>Deleted Items</span>
                     </button>
                     <button
+                        onClick={() => { setActiveTab('Settings'); if (window.innerWidth < 768) setSidebarOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${activeTab === 'Settings'
+                            ? 'bg-[#1D1D1F] text-white dark:bg-white dark:text-black shadow-md'
+                            : 'text-[#555] dark:text-[#a0a0a0] hover:bg-black/5 dark:hover:bg-white/10'
+                            } ${!sidebarOpen ? 'justify-center' : ''}`}
+                        title={!sidebarOpen ? 'Settings' : undefined}
+                    >
+                        <Icons.Sun className={`w-5 h-5 flex-shrink-0 ${activeTab === 'Settings' ? 'opacity-100' : 'opacity-70'}`} />
+                        <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} truncate`}>Settings</span>
+                    </button>
+                    <button
                         onClick={() => { setActiveTab('ExportImport'); if (window.innerWidth < 768) setSidebarOpen(false); }}
                         className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${activeTab === 'ExportImport'
                             ? 'bg-[#1D1D1F] text-white dark:bg-white dark:text-black shadow-md'
@@ -380,11 +399,45 @@ export const Dashboard: React.FC = () => {
                         <DeletedList token={token} />
                     ) : activeTab === 'Analytics' ? (
                         <AnalyticsView token={token} />
+                    ) : activeTab === 'Settings' ? (
+                        <SettingsView token={token} />
                     ) : (
                         <DataList tab={activeTab as Tab} token={token} />
                     )}
                 </div>
             </main>
+        </div>
+    );
+};
+
+const SettingsView: React.FC<{ token: string }> = ({ token }) => {
+    const settings = useQuery(api.portfolio.getSettings) || [];
+    const updateSetting = useMutation(api.portfolio.updateSetting);
+
+    const showVideos = settings.find(s => s.key === 'showVideos')?.value ?? true;
+
+    const handleToggleVideos = async () => {
+        await updateSetting({ token, key: 'showVideos', value: !showVideos });
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white dark:bg-[#1C1C1E] p-8 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A]">
+                <h3 className="text-xl font-bold mb-6">Feature Toggles</h3>
+
+                <div className="flex items-center justify-between p-4 bg-[#F5F5F7] dark:bg-[#2C2C2E] rounded-xl border border-[#D2D2D7]/50 dark:border-[#38383A]/50">
+                    <div className="space-y-1">
+                        <div className="font-semibold">Show YouTube Videos</div>
+                        <div className="text-sm text-[#86868B]">Toggle the visibility of the "Talks & Tutorials" grid on the home page.</div>
+                    </div>
+                    <button
+                        onClick={handleToggleVideos}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${showVideos ? 'bg-[#34C759]' : 'bg-[#D1D1D6] dark:bg-[#38383A]'}`}
+                    >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showVideos ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };

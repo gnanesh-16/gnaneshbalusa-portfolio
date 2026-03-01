@@ -550,3 +550,32 @@ export const importData = mutation({
         return "Import complete";
     }
 });
+// --- Settings ---
+export const getSettings = query({
+    handler: async (ctx) => {
+        return await ctx.db.query("settings").collect();
+    }
+});
+
+export const updateSetting = mutation({
+    args: {
+        token: v.string(),
+        key: v.string(),
+        value: v.any()
+    },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        const { token, key, value } = args;
+        const existing = await ctx.db
+            .query("settings")
+            .filter((q) => q.eq(q.field("key"), key))
+            .first();
+
+        if (existing) {
+            await ctx.db.patch(existing._id, { value });
+            return existing._id;
+        } else {
+            return await ctx.db.insert("settings", { key, value });
+        }
+    }
+});
