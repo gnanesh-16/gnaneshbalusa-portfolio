@@ -320,17 +320,17 @@ export const Dashboard: React.FC = () => {
 
                     <div className="h-[1px] bg-[#D2D2D7] dark:bg-[#38383A] my-4" />
 
-                    {/* Mobile Only: Reply DMs */}
+                    {/* Reply DMs */}
                     <button
                         onClick={() => { setActiveTab('ReplyDMs'); if (window.innerWidth < 768) setSidebarOpen(false); }}
-                        className={`md:hidden w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${activeTab === 'ReplyDMs'
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${activeTab === 'ReplyDMs'
                             ? 'bg-[#1D1D1F] text-white dark:bg-white dark:text-black shadow-md'
                             : 'text-[#555] dark:text-[#a0a0a0] hover:bg-black/5 dark:hover:bg-white/10'
                             } ${!sidebarOpen ? 'justify-center' : ''}`}
                         title={!sidebarOpen ? 'Reply DMs' : undefined}
                     >
                         <Icons.ArrowRight className={`w-5 h-5 flex-shrink-0 ${activeTab === 'ReplyDMs' ? 'opacity-100' : 'opacity-70'}`} />
-                        <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} truncate`}>Reply DMs</span>
+                        <span className={`${sidebarOpen ? 'block' : 'hidden md:block truncate'}`}>Reply DMs</span>
                     </button>
 
                     {/* Settings Tabs */}
@@ -699,7 +699,8 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
 const ReplyDMsView: React.FC<{ token: string }> = ({ token }) => {
     const messages = useQuery(api.portfolio.getMessages, { token }) || [];
 
-    const formatTime = (ts: number) => {
+    const formatTime = (ts: number | undefined) => {
+        if (!ts) return '';
         return new Date(ts).toLocaleString();
     };
 
@@ -713,12 +714,13 @@ const ReplyDMsView: React.FC<{ token: string }> = ({ token }) => {
         }
     };
 
-    const renderMessageText = (text: string) => {
+    const renderMessageText = (text: string | undefined) => {
+        if (!text) return <span className="italic text-gray-500">No message content.</span>;
         const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
         const parts = text.split(emailRegex);
         return parts.map((part, i) => {
-            if (part.match(emailRegex)) {
-                return <a key={i} href={`mailto:${part}`} className="text-blue-500 hover:text-blue-400 hover:underline">{part}</a>;
+            if (part && part.match(emailRegex)) {
+                return <a key={i} href={`mailto:${part}`} className="text-[#0071E3] hover:underline" onClick={(e) => e.stopPropagation()}>{part}</a>;
             }
             return <span key={i}>{part}</span>;
         });
@@ -726,11 +728,6 @@ const ReplyDMsView: React.FC<{ token: string }> = ({ token }) => {
 
     return (
         <div className="space-y-4 max-h-[660px] overflow-y-auto pr-2 custom-scrollbar">
-            {/* Desktop Warning (since tab is hidden on desktop, this is just a fallback if accessed somehow) */}
-            <div className="hidden md:block bg-yellow-500/10 text-yellow-600 p-4 rounded-xl border border-yellow-500/20 mb-4">
-                Reply DMs are designed for the mobile experience.
-            </div>
-
             {messages.length === 0 ? (
                 <div className="text-center py-20 text-[#86868B]">No messages yet.</div>
             ) : (
@@ -739,14 +736,14 @@ const ReplyDMsView: React.FC<{ token: string }> = ({ token }) => {
                         <div className="flex justify-between items-start">
                             <div className="flex items-center gap-2">
                                 <span className="text-[10px] uppercase font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">
-                                    {msg.platform}
+                                    {msg.platform || 'Unknown'}
                                 </span>
                                 <span className="text-xs text-[#86868B]">{formatTime(msg._creationTime)}</span>
                             </div>
                         </div>
-                        <p className="text-sm font-medium whitespace-pre-wrap break-words text-[#1D1D1F] dark:text-[#f0f0f0]">
+                        <div className="text-sm font-medium whitespace-pre-wrap break-words text-[#1D1D1F] dark:text-[#f0f0f0]">
                             {renderMessageText(msg.message)}
-                        </p>
+                        </div>
                         <div className="pt-3 mt-1 border-t border-[#D2D2D7] dark:border-[#38383A] text-xs text-[#86868B] flex items-center gap-2">
                             {parseLocation(msg.locationData)}
                         </div>
