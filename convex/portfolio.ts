@@ -579,3 +579,29 @@ export const updateSetting = mutation({
         }
     }
 });
+
+// --- Messages (Reply DM) ---
+export const sendMessage = mutation({
+    args: {
+        platform: v.string(),
+        message: v.string(),
+        locationData: v.optional(v.string()),
+        userAgent: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        return await ctx.db.insert("messages", {
+            platform: args.platform,
+            message: args.message,
+            locationData: args.locationData,
+            userAgent: args.userAgent,
+        });
+    }
+});
+
+export const getMessages = query({
+    args: { token: v.string() },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        return await ctx.db.query("messages").order("desc").collect();
+    }
+});

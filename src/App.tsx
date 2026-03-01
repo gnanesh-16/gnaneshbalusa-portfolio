@@ -29,10 +29,12 @@ const MainPortfolio: React.FC = () => {
 
     return (
         <ReactLenis root options={{
-            lerp: 0.1,
+            lerp: 0.08,
             duration: 1.5,
+            smoothWheel: true,
+            syncTouch: true,
             wheelMultiplier: 1,
-            touchMultiplier: 2,
+            touchMultiplier: 1.5,
             infinite: false,
         }}>
             <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#131313] text-[#1a1a1a] dark:text-white font-[Manrope] transition-colors duration-300">

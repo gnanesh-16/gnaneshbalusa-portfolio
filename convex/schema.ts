@@ -50,4 +50,10 @@ export default defineSchema({
         key: v.string(),
         value: v.any(),
     }),
+    messages: defineTable({
+        platform: v.string(),
+        message: v.string(),
+        locationData: v.optional(v.string()), // JSON string of location data
+        userAgent: v.optional(v.string()),
+    }),
 });

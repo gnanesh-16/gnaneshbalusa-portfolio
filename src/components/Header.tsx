@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useLenis } from 'lenis/react';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import { Icons } from './Icons';
-
 interface HeaderProps {
     onAboutClick?: () => void;
     onNavClick?: () => void;
@@ -12,8 +13,61 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
     const [activeProfile, setActiveProfile] = useState('');
     const [message, setMessage] = useState('');
     const [isSent, setIsSent] = useState(false);
+    const [isSending, setIsSending] = useState(false);
 
     const lenis = useLenis();
+    const sendConvexMessage = useMutation(api.portfolio.sendMessage);
+
+    const handleSend = async () => {
+        if (!message.trim() || isSending) return;
+        setIsSending(true);
+
+        let locationData = '';
+        try {
+            const res = await fetch('https://ipapi.co/json/');
+            const data = await res.json();
+            locationData = JSON.stringify({
+                city: data.city,
+                region: data.region,
+                country: data.country_name,
+                ip: data.ip
+            });
+        } catch (e) {
+            console.error('Failed to fetch location data');
+        }
+
+        try {
+            await sendConvexMessage({
+                platform: activeProfile,
+                message: message.trim(),
+                locationData,
+                userAgent: navigator.userAgent
+            });
+        } catch (e) {
+            console.error('Failed to send message', e);
+        }
+
+        setIsSending(false);
+        setIsSent(true);
+
+        setTimeout(() => {
+            setMobileMenuOpen(false);
+            setIsSent(false);
+            setActiveProfile('');
+            setMessage('');
+        }, 3000);
+    };
+
+    const renderHighlightedText = (text: string) => {
+        const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
+        const parts = text.split(emailRegex);
+        return parts.map((part, i) => {
+            if (part.match(emailRegex)) {
+                return <span key={i} className="underline decoration-blue-400 font-medium text-blue-400 underline-offset-2">{part}</span>;
+            }
+            return <span key={i}>{part}</span>;
+        });
+    };
 
     const scrollToSection = (id: string) => {
         setMobileMenuOpen(false);
@@ -137,31 +191,40 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
 
                                         {!isSent ? (
                                             <>
-                                                <textarea
-                                                    maxLength={200}
-                                                    value={message}
-                                                    onChange={(e) => setMessage(e.target.value)}
-                                                    placeholder="Type your message..."
-                                                    className="w-full h-24 px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800/50 text-[#f0f0f0] text-sm focus:outline-none focus:border-white/20 resize-none transition-colors"
-                                                />
+                                                <div className="relative w-full h-24 rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden text-sm">
+                                                    {/* Background Highlighting Layer */}
+                                                    <div
+                                                        className="absolute inset-0 px-3 py-2 text-[#f0f0f0] whitespace-pre-wrap break-words pointer-events-none"
+                                                        aria-hidden="true"
+                                                    >
+                                                        {renderHighlightedText(message)}
+                                                        {/* Adding transparent space at end to make the cursor align properly if trailing spaces exist */}
+                                                        <span className="opacity-0"> </span>
+                                                    </div>
+
+                                                    {/* Foreground Textarea (Transparent text) */}
+                                                    <textarea
+                                                        maxLength={200}
+                                                        value={message}
+                                                        onChange={(e) => setMessage(e.target.value)}
+                                                        placeholder={message ? '' : 'Type your message...'}
+                                                        className="absolute inset-0 w-full h-full px-3 py-2 bg-transparent text-transparent caret-white focus:outline-none focus:border-white/20 resize-none transition-colors"
+                                                        spellCheck={false}
+                                                    />
+                                                </div>
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-[10px] text-zinc-500 font-bold uppercase">{message.length}/200</span>
                                                     <button
-                                                        disabled={!message.trim()}
-                                                        onClick={() => {
-                                                            setIsSent(true);
-
-                                                            setTimeout(() => {
-                                                                setMobileMenuOpen(false);
-                                                                setIsSent(false);
-                                                                setActiveProfile('');
-                                                                setMessage('');
-                                                            }, 3000);
-                                                        }}
+                                                        disabled={!message.trim() || isSending}
+                                                        onClick={handleSend}
                                                         className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-colors disabled:opacity-50"
                                                     >
-                                                        <Icons.Send className="w-3 h-3" />
-                                                        Send
+                                                        {isSending ? (
+                                                            <div className="w-3 h-3 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                                        ) : (
+                                                            <Icons.Send className="w-3 h-3" />
+                                                        )}
+                                                        {isSending ? 'Sending...' : 'Send'}
                                                     </button>
                                                 </div>
                                             </>
