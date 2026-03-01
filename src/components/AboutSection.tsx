@@ -255,6 +255,24 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* Mobile At-a-Glance Impact Metrics */}
+                                <div className="md:hidden mt-6 mb-2 flex justify-between items-center w-full max-w-[380px] px-2 py-4 bg-[#f8f8f8] dark:bg-[#1a1a1a] rounded-xl border border-[#e5e5e5] dark:border-zinc-800 shadow-sm">
+                                    <div className="flex flex-col items-center flex-1">
+                                        <span className="text-lg font-black text-[#1a1a1a] dark:text-white tracking-tighter">3+</span>
+                                        <span className="text-[9px] font-bold text-[#86868b] uppercase tracking-wider mt-0.5 text-center">Years Exp</span>
+                                    </div>
+                                    <div className="w-[1px] h-8 bg-[#e5e5e5] dark:bg-zinc-800"></div>
+                                    <div className="flex flex-col items-center flex-1">
+                                        <span className="text-lg font-black text-[#1a1a1a] dark:text-white tracking-tighter">14.73k+</span>
+                                        <span className="text-[9px] font-bold text-[#86868b] uppercase tracking-wider mt-0.5 text-center">Downloads</span>
+                                    </div>
+                                    <div className="w-[1px] h-8 bg-[#e5e5e5] dark:bg-zinc-800"></div>
+                                    <div className="flex flex-col items-center flex-1">
+                                        <span className="text-lg font-black text-[#1a1a1a] dark:text-white tracking-tighter">1</span>
+                                        <span className="text-[9px] font-bold text-[#86868b] uppercase tracking-wider mt-0.5 text-center">Patents</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
