@@ -5,7 +5,7 @@ import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { Icons } from '../components/Icons';
 
-type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Videos' | 'Connects Cards' | 'Deleted' | 'ExportImport' | 'Analytics' | 'Settings' | 'ReplyDMs';
+type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Videos' | 'Connects Cards' | 'Deleted' | 'ExportImport' | 'Analytics' | 'Settings' | 'ReplyDMs' | 'Calendly';
 
 // --- Generic Data List Component ---
 const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
@@ -344,6 +344,326 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
     );
 };
 
+// ─────────────────────────────── CalendlyView ───────────────────────────────
+// ─────────────────────────────── CalendlyView ───────────────────────────────
+const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
+    const allSlots = useQuery(api.portfolio.getAllSlots, { token }) ?? [];
+    const bookingRequests = useQuery(api.portfolio.getBookingRequests, { token }) ?? [];
+    const createSlot = useMutation(api.portfolio.createSlot);
+    const deleteSlot = useMutation(api.portfolio.deleteSlot);
+    const approveBooking = useMutation(api.portfolio.approveBooking);
+    const rejectBooking = useMutation(api.portfolio.rejectBooking);
+    const updateBooking = useMutation(api.portfolio.updateBooking);
+
+    const today = new Date();
+    const [viewYear, setViewYear] = useState(today.getFullYear());
+    const [viewMonth, setViewMonth] = useState(today.getMonth());
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [isBulkMode, setIsBulkMode] = useState(false);
+    const [bulkSelectedDates, setBulkSelectedDates] = useState<Set<string>>(new Set());
+
+    // Day Panel State
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [newStart, setNewStart] = useState('10:00');
+    const [newEnd, setNewEnd] = useState('10:30');
+    const [isCreating, setIsCreating] = useState(false);
+
+    // Edit Request State
+    const [editingRequest, setEditingRequest] = useState<string | null>(null);
+    const [editMeetType, setEditMeetType] = useState('');
+    const [editGMeet, setEditGMeet] = useState('');
+
+    const isoDate = (y: number, m: number, d: number) => {
+        const mm = (m + 1).toString().padStart(2, '0');
+        const dd = d.toString().padStart(2, '0');
+        return `${y}-${mm}-${dd}`;
+    };
+
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    const slotsByDate = allSlots.reduce<Record<string, typeof allSlots>>((acc, slot) => {
+        acc[slot.date] = acc[slot.date] ?? [];
+        acc[slot.date].push(slot);
+        return acc;
+    }, {});
+
+    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+
+    const handleCreateSlot = async (date: string) => {
+        if (!newStart || !newEnd || isCreating) return;
+        setIsCreating(true);
+        await createSlot({ token, date, startTime: newStart, endTime: newEnd });
+        setIsCreating(false);
+    };
+
+    const handleBulkCreate = async () => {
+        if (bulkSelectedDates.size === 0 || !newStart || !newEnd || isCreating) return;
+        setIsCreating(true);
+        for (const date of Array.from(bulkSelectedDates)) {
+            await createSlot({ token, date, startTime: newStart, endTime: newEnd });
+        }
+        setBulkSelectedDates(new Set());
+        setIsBulkMode(false);
+        setIsCreating(false);
+    };
+
+    const startEdit = (req: any) => {
+        setEditingRequest(req._id);
+        setEditMeetType(req.meetType || 'Interview');
+        setEditGMeet(req.gmeetLink || '');
+    };
+
+    const saveEdit = async (requestId: Id<'bookingRequests'>) => {
+        await updateBooking({ token, requestId, meetType: editMeetType, gmeetLink: editGMeet });
+        setEditingRequest(null);
+    };
+
+    const formatDate = (d: string) => {
+        try { return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); }
+        catch { return d; }
+    };
+
+    const statusColor: Record<string, string> = {
+        pending: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400',
+        approved: 'bg-green-500/20 text-green-600 dark:text-green-400',
+        rejected: 'bg-red-500/20 text-red-600 dark:text-red-400',
+    };
+
+    return (
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 h-full">
+            {/* LEFT: Calendar Slot Manager */}
+            <div className="xl:col-span-12 2xl:col-span-7 flex flex-col gap-6 ">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight">Manage Availability</h2>
+                        <p className="text-[#86868B] text-sm mt-1">Calendar-based slot planning</p>
+                    </div>
+                    <button
+                        onClick={() => { setIsBulkMode(!isBulkMode); setBulkSelectedDates(new Set()); }}
+                        className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${isBulkMode ? 'bg-blue-500 text-white shadow-lg' : 'bg-white dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] text-[#86868B]'}`}
+                    >
+                        {isBulkMode ? 'Cancel Bulk' : 'Bulk Add Slots'}
+                    </button>
+                </div>
+
+                <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl border border-[#D2D2D7] dark:border-[#38383A] p-6 shadow-sm overflow-hidden">
+                    {/* Month Nav */}
+                    <div className="flex items-center justify-between mb-8 px-2">
+                        <div className="flex gap-4 items-center">
+                            <h3 className="text-lg font-bold min-w-[140px]">{MONTHS[viewMonth]} {viewYear}</h3>
+                            <div className="flex gap-1">
+                                <button onClick={() => { if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); } else setViewMonth(m => m - 1); }}
+                                    className="p-1.5 hover:bg-[#F5F5F7] dark:hover:bg-[#2C2C2E] rounded-lg text-[#86868B] transition-colors"><Icons.ArrowLeft className="w-5 h-5" /></button>
+                                <button onClick={() => { if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); } else setViewMonth(m => m + 1); }}
+                                    className="p-1.5 hover:bg-[#F5F5F7] dark:hover:bg-[#2C2C2E] rounded-lg text-[#86868B] transition-colors"><Icons.ArrowRight className="w-5 h-5" /></button>
+                            </div>
+                        </div>
+                        {isBulkMode && (
+                            <div className="flex items-center gap-4 bg-[#F5F5F7] dark:bg-[#2C2C2E] px-4 py-2 rounded-2xl animate-in fade-in slide-in-from-right-4">
+                                <p className="text-xs font-medium">{bulkSelectedDates.size} selected</p>
+                                <div className="h-4 w-[1px] bg-[#D2D2D7] dark:border-[#38383A]" />
+                                <div className="flex gap-2 items-center">
+                                    <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)} className="bg-transparent text-xs border-none focus:ring-0 p-0 w-16" />
+                                    <span className="text-[#86868B] text-[10px]">to</span>
+                                    <input type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)} className="bg-transparent text-xs border-none focus:ring-0 p-0 w-16" />
+                                </div>
+                                <button onClick={handleBulkCreate} disabled={bulkSelectedDates.size === 0 || isCreating} className="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-blue-600 disabled:opacity-40 transition-all">
+                                    {isCreating ? 'Adding...' : 'Applied'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-2">
+                        {DAYS.map(d => <div key={d} className="text-center text-[10px] uppercase font-bold text-[#86868B] tracking-wider py-2">{d}</div>)}
+                        {cells.map((day, i) => {
+                            if (!day) return <div key={i} />;
+                            const dStr = isoDate(viewYear, viewMonth, day);
+                            const daySlots = slotsByDate[dStr] || [];
+                            const isSelected = selectedDate === dStr;
+                            const isBulkSelected = bulkSelectedDates.has(dStr);
+                            const hasBooked = daySlots.some(s => s.isBooked);
+
+                            return (
+                                <button
+                                    key={i}
+                                    onClick={() => {
+                                        if (isBulkMode) {
+                                            const next = new Set(bulkSelectedDates);
+                                            if (next.has(dStr)) next.delete(dStr); else next.add(dStr);
+                                            setBulkSelectedDates(next);
+                                        } else {
+                                            setSelectedDate(dStr);
+                                            setIsPanelOpen(true);
+                                        }
+                                    }}
+                                    className={`aspect-square relative flex flex-col items-center justify-center rounded-2xl transition-all border
+                                        ${isBulkSelected ? 'bg-blue-500/10 border-blue-500 dark:border-blue-400' :
+                                            isSelected ? 'bg-black dark:bg-white text-white dark:text-black border-transparent shadow-lg scale-105' :
+                                                'bg-[#F5F5F7] dark:bg-[#2C2C2E] border-transparent hover:bg-[#EFEEF1] dark:hover:bg-[#38383A]'}
+                                    `}
+                                >
+                                    <span className="text-sm font-semibold">{day}</span>
+                                    {daySlots.length > 0 && (
+                                        <div className="flex gap-0.5 mt-1">
+                                            {daySlots.slice(0, 3).map((_, idx) => (
+                                                <div key={idx} className={`w-1 h-1 rounded-full ${hasBooked ? 'bg-green-500' : 'bg-blue-500'}`} />
+                                            ))}
+                                            {daySlots.length > 3 && <div className="w-1 h-1 rounded-full bg-gray-400" />}
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* RIGHT: Booking Requests & Day Details */}
+            <div className="xl:col-span-12 2xl:col-span-5 flex flex-col gap-8">
+                {/* Day Details (Floating or side) */}
+                {isPanelOpen && selectedDate && (
+                    <div className="bg-white dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] rounded-3xl p-6 shadow-xl animate-in slide-in-from-right-4">
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 className="text-lg font-bold">{formatDate(selectedDate)}</h3>
+                                <p className="text-xs text-[#86868B] mt-0.5">{slotsByDate[selectedDate]?.length || 0} slots available</p>
+                            </div>
+                            <button onClick={() => setIsPanelOpen(false)} className="p-1.5 hover:bg-[#F5F5F7] dark:hover:bg-[#2C2C2E] rounded-xl text-[#86868B]"><Icons.X className="w-5 h-5" /></button>
+                        </div>
+
+                        {/* Add Slot */}
+                        <div className="flex items-center gap-3 mb-6 p-3 bg-[#F5F5F7] dark:bg-[#2C2C2E] rounded-2xl">
+                            <div className="flex-1 flex gap-2 items-center">
+                                <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)} className="bg-transparent text-sm border-none focus:ring-0 p-0 w-20 font-medium" />
+                                <span className="text-[#86868B] text-xs">to</span>
+                                <input type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)} className="bg-transparent text-sm border-none focus:ring-0 p-0 w-20 font-medium" />
+                            </div>
+                            <button onClick={() => handleCreateSlot(selectedDate)} disabled={isCreating} className="bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 rounded-xl text-xs font-bold hover:opacity-80 transition-all">
+                                {isCreating ? '...' : '+ Add'}
+                            </button>
+                        </div>
+
+                        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                            {(slotsByDate[selectedDate] || []).map(slot => (
+                                <div key={slot._id} className="flex items-center justify-between p-3.5 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A] bg-white dark:bg-[#1C1C1E]">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-2 h-2 rounded-full ${slot.isBooked ? 'bg-green-500' : 'bg-blue-500'}`} />
+                                        <span className="text-sm font-medium">{slot.startTime} – {slot.endTime}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        {slot.isBooked && <span className="text-[10px] font-bold text-green-600 uppercase">Booked</span>}
+                                        {!slot.isBooked && (
+                                            <button onClick={() => deleteSlot({ token, id: slot._id as Id<'availableSlots'> })}
+                                                className="w-8 h-8 rounded-xl hover:bg-red-500/10 flex items-center justify-center text-[#86868B] hover:text-red-500 transition-all">
+                                                <Icons.X className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Booking Requests */}
+                <div className="flex flex-col gap-6">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight">Recruiter Hooks</h2>
+                        <p className="text-[#86868B] text-sm mt-1">{bookingRequests.filter(r => r.status === 'pending').length} needing attention</p>
+                    </div>
+
+                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                        {bookingRequests.length === 0 ? (
+                            <div className="text-center py-20 bg-white dark:bg-[#1C1C1E] border border-dashed border-[#D2D2D7] dark:border-[#38383A] rounded-3xl text-[#86868B]">No requests yet.</div>
+                        ) : (
+                            [...bookingRequests].sort((a, b) => b.createdAt - a.createdAt).map(req => {
+                                const slot = allSlots.find(s => s._id === req.slotId);
+                                const isEditing = editingRequest === req._id;
+                                return (
+                                    <div key={req._id} className="group rounded-3xl border border-[#D2D2D7] dark:border-[#38383A] p-5 bg-white dark:bg-[#1C1C1E] shadow-sm hover:shadow-md transition-all flex flex-col gap-4 relative">
+                                        <div className="flex items-start justify-between">
+                                            <div className="space-y-0.5">
+                                                <p className="font-bold text-base leading-tight">{req.name}</p>
+                                                <p className="text-sm text-[#86868B]">{req.email}</p>
+                                            </div>
+                                            <span className={`text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-widest ${statusColor[req.status]}`}>
+                                                {req.status}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 px-3 py-2 bg-[#F5F5F7] dark:bg-[#2C2C2E] rounded-xl flex items-center gap-2 text-xs font-medium">
+                                                <Icons.Briefcase className="w-3.5 h-3.5 text-[#86868B]" />
+                                                <span>{slot ? `${formatDate(slot.date)} · ${slot.startTime}` : 'Date/Time Unknown'}</span>
+                                            </div>
+                                            <div className="px-3 py-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl text-[10px] font-black uppercase tracking-tight">
+                                                {req.meetType || 'Interview'}
+                                            </div>
+                                        </div>
+
+                                        {req.note && <p className="text-xs text-[#555] dark:text-[#a0a0a0] leading-relaxed italic border-l-2 border-[#D2D2D7] dark:border-[#38383A] pl-3 py-0.5">{req.note}</p>}
+
+                                        {/* Approved/Actions Section */}
+                                        <div className="pt-2 border-t border-[#F5F5F7] dark:border-[#2C2C2E] flex flex-col gap-3">
+                                            {isEditing ? (
+                                                <div className="flex flex-col gap-3 animate-in fade-in zoom-in-95">
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <select value={editMeetType} onChange={e => setEditMeetType(e.target.value)} className="bg-[#F5F5F7] dark:bg-[#2C2C2E] border-none rounded-xl text-xs py-2">
+                                                            {['Interview', 'Coffee Chat', 'Connect', 'General Meeting'].map(t => <option key={t} value={t}>{t}</option>)}
+                                                        </select>
+                                                        <input value={editGMeet} onChange={e => setEditGMeet(e.target.value)} placeholder="GMeet / Zoom Link" className="bg-[#F5F5F7] dark:bg-[#2C2C2E] border-none rounded-xl text-xs py-2" />
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => saveEdit(req._id)} className="flex-1 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl text-[10px] font-bold">Save Changes</button>
+                                                        <button onClick={() => setEditingRequest(null)} className="px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-[10px] font-bold">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-between gap-3">
+                                                    {(req.status === 'approved' || req.status === 'pending') && (
+                                                        <div className="flex items-center gap-2 text-[10px]">
+                                                            {req.gmeetLink ? (
+                                                                <button onClick={() => window.open(req.gmeetLink, '_blank')} className="text-blue-500 hover:underline flex items-center gap-1">
+                                                                    <Icons.Video className="w-3 h-3" /> GMeet Link Attached
+                                                                </button>
+                                                            ) : (
+                                                                <span className="text-[#86868B] italic">No meeting link yet</span>
+                                                            )}
+                                                            <button onClick={() => startEdit(req)} className="w-6 h-6 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg flex items-center justify-center text-[#86868B] transition-all"><Icons.PenTool className="w-3 h-3" /></button>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex gap-2 ml-auto">
+                                                        {req.status === 'pending' && (
+                                                            <button onClick={() => approveBooking({ token, requestId: req._id })}
+                                                                className="px-4 py-1.5 rounded-xl bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase hover:opacity-80 transition-all">Approve</button>
+                                                        )}
+                                                        {(req.status === 'pending' || req.status === 'approved') && (
+                                                            <button onClick={() => rejectBooking({ token, requestId: req._id })}
+                                                                className="px-4 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-[10px] font-black uppercase hover:bg-red-500/20 transition-all">Reject</button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <p className="absolute bottom-2 right-4 text-[9px] text-[#86868B] opacity-40">{new Date(req.createdAt).toLocaleDateString()}</p>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+
 export const Dashboard: React.FC = () => {
     const navigate = useNavigate();
     const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
@@ -435,6 +755,19 @@ export const Dashboard: React.FC = () => {
                         <span className={`${sidebarOpen ? 'block' : 'hidden md:block truncate'}`}>Reply DMs</span>
                     </button>
 
+                    {/* Calendly */}
+                    <button
+                        onClick={() => { setActiveTab('Calendly'); if (window.innerWidth < 768) setSidebarOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${activeTab === 'Calendly'
+                            ? 'bg-[#1D1D1F] text-white dark:bg-white dark:text-black shadow-md'
+                            : 'text-[#555] dark:text-[#a0a0a0] hover:bg-black/5 dark:hover:bg-white/10'
+                            } ${!sidebarOpen ? 'justify-center' : ''}`}
+                        title={!sidebarOpen ? 'Calendly' : undefined}
+                    >
+                        <Icons.Briefcase className={`w-5 h-5 flex-shrink-0 ${activeTab === 'Calendly' ? 'opacity-100' : 'opacity-70'}`} />
+                        <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} truncate`}>Calendly</span>
+                    </button>
+
                     {/* Settings Tabs */}
                     <button
                         onClick={() => { setActiveTab('Analytics'); if (window.innerWidth < 768) setSidebarOpen(false); }}
@@ -518,6 +851,8 @@ export const Dashboard: React.FC = () => {
                         <SettingsView token={token} />
                     ) : activeTab === 'ReplyDMs' ? (
                         <ReplyDMsView token={token} />
+                    ) : activeTab === 'Calendly' ? (
+                        <CalendlyView token={token} />
                     ) : (
                         <DataList tab={activeTab as Tab} token={token} />
                     )}

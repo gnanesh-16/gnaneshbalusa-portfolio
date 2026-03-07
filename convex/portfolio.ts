@@ -686,3 +686,132 @@ export const getMessages = query({
         return await ctx.db.query("messages").order("desc").collect();
     }
 });
+
+// --- Scheduling ---
+
+export const getAvailableSlots = query({
+    handler: async (ctx) => {
+        return await ctx.db
+            .query("availableSlots")
+            .filter(q => q.and(
+                q.neq(q.field("isBooked"), true),
+                q.neq(q.field("isDeleted"), true)
+            ))
+            .collect();
+    }
+});
+
+export const getAllSlots = query({
+    args: { token: v.string() },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        return await ctx.db
+            .query("availableSlots")
+            .filter(q => q.neq(q.field("isDeleted"), true))
+            .collect();
+    }
+});
+
+export const createSlot = mutation({
+    args: {
+        token: v.string(),
+        date: v.string(),
+        startTime: v.string(),
+        endTime: v.string(),
+    },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.insert("availableSlots", {
+            date: args.date,
+            startTime: args.startTime,
+            endTime: args.endTime,
+            isBooked: false,
+        });
+    }
+});
+
+export const deleteSlot = mutation({
+    args: { token: v.string(), id: v.id("availableSlots") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: true });
+    }
+});
+
+export const requestBooking = mutation({
+    args: {
+        slotId: v.id("availableSlots"),
+        name: v.string(),
+        email: v.string(),
+        note: v.optional(v.string()),
+        meetType: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const slot = await ctx.db.get(args.slotId);
+        if (!slot || slot.isBooked || slot.isDeleted) {
+            throw new Error("Slot is no longer available");
+        }
+        await ctx.db.insert("bookingRequests", {
+            slotId: args.slotId,
+            name: args.name,
+            email: args.email,
+            note: args.note,
+            meetType: args.meetType,
+            status: "pending",
+            createdAt: Date.now(),
+        });
+    }
+});
+
+export const getBookingRequests = query({
+    args: { token: v.string() },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        return await ctx.db.query("bookingRequests").order("desc").collect();
+    }
+});
+
+export const approveBooking = mutation({
+    args: { token: v.string(), requestId: v.id("bookingRequests") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        const request = await ctx.db.get(args.requestId);
+        if (!request) throw new Error("Request not found");
+        await ctx.db.patch(args.requestId, { status: "approved" });
+        await ctx.db.patch(request.slotId as any, {
+            isBooked: true,
+            bookedRequestId: args.requestId,
+        });
+    }
+});
+
+export const rejectBooking = mutation({
+    args: { token: v.string(), requestId: v.id("bookingRequests") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        const request = await ctx.db.get(args.requestId);
+        if (!request) throw new Error("Request not found");
+        await ctx.db.patch(args.requestId, { status: "rejected" });
+        // If it was approved, free the slot back up
+        if (request.status === 'approved') {
+            await ctx.db.patch(request.slotId as any, { isBooked: false, bookedRequestId: undefined });
+        }
+    }
+});
+
+export const updateBooking = mutation({
+    args: {
+        token: v.string(),
+        requestId: v.id("bookingRequests"),
+        gmeetLink: v.optional(v.string()),
+        meetType: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        const patch: Record<string, any> = {};
+        if (args.gmeetLink !== undefined) patch.gmeetLink = args.gmeetLink;
+        if (args.meetType !== undefined) patch.meetType = args.meetType;
+        await ctx.db.patch(args.requestId, patch);
+    }
+});
+

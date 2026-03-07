@@ -69,7 +69,26 @@ export default defineSchema({
     messages: defineTable({
         platform: v.string(),
         message: v.string(),
-        locationData: v.optional(v.string()), // JSON string of location data
+        locationData: v.optional(v.string()),
         userAgent: v.optional(v.string()),
     }),
+    availableSlots: defineTable({
+        date: v.string(),         // ISO date "2026-03-15"
+        startTime: v.string(),    // "10:00 AM"
+        endTime: v.string(),      // "10:30 AM"
+        isBooked: v.boolean(),
+        bookedRequestId: v.optional(v.string()),
+        isDeleted: v.optional(v.boolean()),
+    }),
+    bookingRequests: defineTable({
+        slotId: v.string(),
+        name: v.string(),
+        email: v.string(),
+        note: v.optional(v.string()),
+        meetType: v.optional(v.string()), // "Interview" | "Coffee Chat" | "Connect" | "General Meeting"
+        gmeetLink: v.optional(v.string()),
+        status: v.union(v.literal('pending'), v.literal('approved'), v.literal('rejected')),
+        createdAt: v.number(),
+    }),
+
 });
