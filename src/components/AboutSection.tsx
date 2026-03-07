@@ -358,7 +358,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
             </div>
 
             {/* Featured Writing */}
-            <section className="py-24">
+            <section id="writing" className="py-24">
                 <div className="max-w-[1200px] mx-auto px-6">
                     <h2 className="text-3xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-12">Featured Writing</h2>
                     <div className="space-y-4">

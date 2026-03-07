@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -19,9 +19,65 @@ import { Dashboard } from './pages/Dashboard';
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
+const SECTION_TITLES: Record<string, string> = {
+    hero: 'Portfolio',
+    about: 'About',
+    experience: 'Experience',
+    writing: 'Writing',
+    projects: 'Projects',
+    publications: 'Publications',
+    videos: 'Talks & Tutorials'
+};
+
+const useActiveSectionTitle = (isResumeOpen: boolean) => {
+    useEffect(() => {
+        if (isResumeOpen) {
+            document.title = 'Gnanesh Balusa / Resume';
+            return;
+        }
+
+        const handleScroll = () => {
+            const sections = Array.from(document.querySelectorAll('section[id]'));
+
+            let maxVisibleArea = 0;
+            let currentSection = '';
+
+            if (window.scrollY < 100) {
+                currentSection = 'hero';
+            } else {
+                sections.forEach((section) => {
+                    const rect = section.getBoundingClientRect();
+                    const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+
+                    if (visibleHeight > maxVisibleArea && visibleHeight > 0) {
+                        maxVisibleArea = visibleHeight;
+                        currentSection = section.id;
+                    }
+                });
+            }
+
+            if (currentSection && SECTION_TITLES[currentSection]) {
+                const newTitle = `Gnanesh Balusa / ${SECTION_TITLES[currentSection]}`;
+                if (document.title !== newTitle) {
+                    document.title = newTitle;
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        // Initial check and when the DOM changes length slightly (hacky but works for initial load)
+        setTimeout(handleScroll, 100);
+        handleScroll();
+
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [isResumeOpen]);
+};
+
 const MainPortfolio: React.FC = () => {
     const [showAboutDesktop, setShowAboutDesktop] = useState(false);
     const [isResumeOpen, setIsResumeOpen] = useState(false);
+
+    useActiveSectionTitle(isResumeOpen);
 
     const handleAboutClick = () => {
         setShowAboutDesktop(true);
