@@ -162,17 +162,13 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             {/* ── DESKTOP: full-screen split layout ── */}
             <div className={`hidden md:flex absolute inset-0 transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${animating ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.98]'}`}>
 
-                {/* LEFT — profile info panel */}
-                <div className="w-[42%] xl:w-[38%] h-full bg-[#0f0f0f] flex flex-col items-center justify-center gap-8 p-12 relative overflow-hidden">
-                    {/* Subtle grain */}
-                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")` }}
-                    />
+                {/* LEFT — hero image + info */}
+                <div className="w-[42%] xl:w-[40%] h-full bg-[#0a0a0a] flex flex-col relative overflow-hidden">
 
-                    {/* Close button top-left */}
+                    {/* Close button */}
                     <button onClick={onClose}
-                        className="absolute top-6 left-6 w-9 h-9 rounded-full bg-white/8 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/15 transition-colors"
-                        style={{ background: 'rgba(255,255,255,0.06)' }}
+                        className="absolute top-6 left-6 z-20 w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                        style={{ background: 'rgba(255,255,255,0.05)' }}
                         aria-label="Close"
                     >
                         <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
@@ -180,65 +176,56 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
                         </svg>
                     </button>
 
-                    {/* Avatar */}
-                    <div className="relative">
-                        <div className="w-28 h-28 rounded-[28px] bg-gradient-to-br from-[#2A2B2E] to-[#080809] border border-white/10 flex items-center justify-center text-white text-4xl font-bold shadow-2xl select-none">
-                            G
+                    {/* Hero photo fills top portion */}
+                    <div className="flex-1 relative">
+                        <img
+                            src="/brand-assets/portfolio-gnaneshbalusa-amazon.jpg"
+                            alt="Gnanesh Balusa"
+                            className="w-full h-full object-cover object-top"
+                        />
+                        {/* Gradient overlay fading to dark at bottom */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/20 to-transparent" />
+                    </div>
+
+                    {/* Info + social icons pinned to bottom */}
+                    <div className="px-10 pb-10 pt-0 flex flex-col gap-5 relative z-10 -mt-20">
+                        <div>
+                            <h2 className="text-2xl font-bold text-white tracking-tight">Gnanesh Balusa</h2>
+                            <p className="text-white/50 text-sm mt-0.5">Machine Learning Engineer · Amazon</p>
                         </div>
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-500 border-2 border-[#0f0f0f]" />
+
+                        {/* Social icons — same as footer */}
+                        <div className="flex items-center gap-5">
+                            <a href="https://x.com/Gnaneshbalusa" target="_blank" rel="noopener noreferrer" title="X (Twitter)"
+                                className="text-white/35 hover:text-white transition-colors">
+                                <Icons.Twitter className="w-5 h-5" />
+                            </a>
+                            <a href="https://github.com/gnanesh-16" target="_blank" rel="noopener noreferrer" title="GitHub"
+                                className="text-white/35 hover:text-white transition-colors">
+                                <Icons.GitHub className="w-5 h-5" />
+                            </a>
+                            <a href="https://in.linkedin.com/in/gnaneshbalusa" target="_blank" rel="noopener noreferrer" title="LinkedIn"
+                                className="text-white/35 hover:text-white transition-colors">
+                                <Icons.LinkedIn className="w-5 h-5" />
+                            </a>
+                            <a href="https://scholar.google.com/citations?user=3NC81YIAAAAJ&hl=en" target="_blank" rel="noopener noreferrer" title="Google Scholar"
+                                className="text-white/35 hover:text-white transition-colors">
+                                <Icons.GoogleScholar className="w-5 h-5" />
+                            </a>
+                            <a href="https://youtube.com/@gnaneshbalusa?si=QKaiNh319Mjh66KG" target="_blank" rel="noopener noreferrer" title="YouTube"
+                                className="text-white/35 hover:text-white transition-colors">
+                                <Icons.YouTube className="w-5 h-5" />
+                            </a>
+                            <a href="https://medium.com/@GnaneshBalusa" target="_blank" rel="noopener noreferrer" title="Medium"
+                                className="text-white/35 hover:text-white transition-colors">
+                                <Icons.Medium className="w-5 h-5" />
+                            </a>
+                        </div>
                     </div>
-
-                    {/* Name + role */}
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold text-white tracking-tight">Gnanesh Balusa</h2>
-                        <p className="text-white/40 text-sm mt-1">Machine Learning Engineer</p>
-                        <p className="text-white/30 text-sm">Amazon</p>
-                    </div>
-
-                    {/* Social icon links */}
-                    <div className="flex items-center gap-3">
-                        <a href="https://in.linkedin.com/in/gnaneshbalusa" target="_blank" rel="noreferrer"
-                            className="w-10 h-10 rounded-xl bg-[#0A66C2] flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg">
-                            <Icons.LinkedIn className="w-4 h-4" />
-                        </a>
-                        <a href="https://github.com/gnanesh-16" target="_blank" rel="noreferrer"
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg border border-white/15"
-                            style={{ background: 'rgba(255,255,255,0.09)' }}>
-                            <Icons.GitHub className="w-4 h-4" />
-                        </a>
-                        <a href="mailto:contact@gnaneshbalusa.com"
-                            className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#FD1D1D] to-[#F56040] flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg">
-                            <Icons.Mail className="w-4 h-4" />
-                        </a>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="w-full border-t border-white/8" style={{ borderColor: 'rgba(255,255,255,0.07)' }} />
-
-                    {/* Recruiter links */}
-                    <div className="w-full flex flex-col gap-3">
-
-                        <a href="mailto:contact@gnaneshbalusa.com" className="flex items-center gap-3 text-white/50 hover:text-white transition-colors text-sm group">
-                            <Icons.Mail className="w-4 h-4 shrink-0 text-white/25 group-hover:text-white/60 transition-colors" />
-                            contact@gnaneshbalusa.com
-                        </a>
-                        <a href="https://in.linkedin.com/in/gnaneshbalusa" target="_blank" rel="noreferrer" className="flex items-center gap-3 text-white/50 hover:text-white transition-colors text-sm group">
-                            <Icons.LinkedIn className="w-4 h-4 shrink-0 text-white/25 group-hover:text-white/60 transition-colors" />
-                            linkedin.com/in/gnaneshbalusa
-                        </a>
-                        <a href="https://github.com/gnanesh-16" target="_blank" rel="noreferrer" className="flex items-center gap-3 text-white/50 hover:text-white transition-colors text-sm group">
-                            <Icons.GitHub className="w-4 h-4 shrink-0 text-white/25 group-hover:text-white/60 transition-colors" />
-                            github.com/gnanesh-16
-                        </a>
-                    </div>
-
-                    <a href="/connects" className="text-xs text-white/25 hover:text-white/50 underline underline-offset-2 transition-colors">
-                        View my digital card wallet →
-                    </a>
                 </div>
 
-                {/* RIGHT — message form */}
-                <div className="flex-1 h-full bg-[#181818] flex flex-col items-center justify-center p-12 xl:p-20">
+                {/* RIGHT — contact form */}
+                <div className="flex-1 h-full bg-[#111111] flex flex-col items-center justify-center p-12 xl:p-16 overflow-y-auto">
                     {isSent ? (
                         <div className="flex flex-col items-center gap-5">
                             <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
@@ -248,19 +235,51 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
                             <p className="text-white/40 text-sm text-center">Thanks for reaching out. I'll get back to you soon.</p>
                         </div>
                     ) : (
-                        <div className="w-full max-w-md flex flex-col gap-5">
-                            <div>
+                        <div className="w-full max-w-md flex flex-col gap-4">
+                            <div className="mb-2">
                                 <h3 className="text-3xl font-bold text-white tracking-tight">Let's connect</h3>
-                                <p className="text-white/40 text-sm mt-2">Drop a message — I read every one.</p>
+                                <p className="text-white/35 text-sm mt-1.5">Drop a message — I read every one.</p>
                             </div>
 
-                            {/* Textarea with char count */}
+                            {/* 4 input fields */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <input
+                                    type="text"
+                                    placeholder="Your name"
+                                    className="w-full border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/25 transition-colors"
+                                    style={{ background: 'rgba(255,255,255,0.05)' }}
+                                    id="contact-name"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Company"
+                                    className="w-full border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/25 transition-colors"
+                                    style={{ background: 'rgba(255,255,255,0.05)' }}
+                                    id="contact-company"
+                                />
+                                <input
+                                    type="email"
+                                    placeholder="Email address"
+                                    className="w-full border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/25 transition-colors"
+                                    style={{ background: 'rgba(255,255,255,0.05)' }}
+                                    id="contact-email"
+                                />
+                                <input
+                                    type="tel"
+                                    placeholder="Phone number"
+                                    className="w-full border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/25 transition-colors"
+                                    style={{ background: 'rgba(255,255,255,0.05)' }}
+                                    id="contact-phone"
+                                />
+                            </div>
+
+                            {/* Message textarea */}
                             <div className="relative">
                                 <textarea
                                     value={message}
                                     onChange={e => setMessage(e.target.value.slice(0, MAX_CHARS))}
                                     placeholder="Write a message..."
-                                    rows={7}
+                                    rows={5}
                                     className="w-full border border-white/10 rounded-2xl px-5 py-4 pb-10 text-sm text-white resize-none focus:outline-none focus:border-white/25 placeholder-white/20 transition-colors"
                                     style={{ background: 'rgba(255,255,255,0.05)' }}
                                 />
@@ -272,7 +291,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
                             <button
                                 onClick={handleSend}
                                 disabled={!message.trim() || isSending}
-                                className="w-full h-13 rounded-2xl bg-white text-black text-sm font-semibold disabled:opacity-30 hover:bg-white/90 transition-all active:scale-[0.99] py-3.5"
+                                className="w-full rounded-2xl bg-white text-black text-sm font-semibold disabled:opacity-30 hover:bg-white/90 transition-all active:scale-[0.99] py-3.5"
                             >
                                 {isSending ? 'Sending…' : 'Send a note'}
                             </button>
