@@ -10,7 +10,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onAboutClick, onResume
     const lenis = useLenis();
     const handleResumeClick = () => {
         // Direct download link from Google Drive
-        const downloadUrl = "https://drive.google.com/uc?export=download&id=16AKWcSpsPhDa2G9kIBxZ-Wb_2E7eYnB8";
+        const downloadUrl = "https://drive.google.com/uc?export=download&id=1djByBNoM1_vANUHEz8xMEzMWV1dbKuHs";
 
         // Trigger download
         const link = document.createElement('a');

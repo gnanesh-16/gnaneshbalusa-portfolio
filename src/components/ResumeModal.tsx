@@ -10,7 +10,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
     if (!isOpen) return null;
 
     // Google Drive preview link
-    const previewUrl = "https://drive.google.com/file/d/16AKWcSpsPhDa2G9kIBxZ-Wb_2E7eYnB8/preview";
+    const previewUrl = "https://drive.google.com/file/d/1djByBNoM1_vANUHEz8xMEzMWV1dbKuHs/preview";
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">

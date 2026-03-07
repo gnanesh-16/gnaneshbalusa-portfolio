@@ -7,7 +7,7 @@ interface ResumeViewerProps {
 
 export const ResumeViewer: React.FC<ResumeViewerProps> = ({ onClose }) => {
     // Google Drive preview link
-    const previewUrl = "https://drive.google.com/file/d/16AKWcSpsPhDa2G9kIBxZ-Wb_2E7eYnB8/preview";
+    const previewUrl = "https://drive.google.com/file/d/1djByBNoM1_vANUHEz8xMEzMWV1dbKuHs/preview";
 
     return (
         <section className="w-full bg-[#f8f6f2] dark:bg-[#0f0f0f] animate-in fade-in slide-in-from-bottom-4 duration-700">

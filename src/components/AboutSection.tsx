@@ -62,7 +62,7 @@ const ProjectIcons = {
 export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop = true, onResumeClick }) => {
     const handleResumeClick = () => {
         // Direct download link from Google Drive
-        const downloadUrl = "https://drive.google.com/uc?export=download&id=16AKWcSpsPhDa2G9kIBxZ-Wb_2E7eYnB8&confirm=t";
+        const downloadUrl = "https://drive.google.com/uc?export=download&id=1djByBNoM1_vANUHEz8xMEzMWV1dbKuHs&confirm=t";
 
         // Trigger download in a new tab/hidden window to prevent redirection
         window.open(downloadUrl, '_blank');
