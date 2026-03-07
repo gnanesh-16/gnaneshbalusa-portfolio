@@ -387,6 +387,78 @@ export const restorePublication = mutation({
     }
 });
 
+// --- Connects Cards ---
+export const getConnectsCards = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("connectsCards")
+            .filter((q) => q.neq(q.field("isDeleted"), true))
+            .collect();
+        return items.sort((a, b) => a.order - b.order);
+    }
+});
+
+export const getDeletedConnectsCards = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("connectsCards")
+            .filter((q) => q.eq(q.field("isDeleted"), true))
+            .collect();
+        return items;
+    }
+});
+
+export const saveConnectsCard = mutation({
+    args: {
+        token: v.string(),
+        id: v.optional(v.id("connectsCards")),
+        title: v.string(),
+        colorFrom: v.optional(v.string()),
+        colorTo: v.optional(v.string()),
+        name: v.string(),
+        role: v.string(),
+        company: v.string(),
+        email: v.string(),
+        phone: v.string(),
+        website: v.optional(v.string()),
+        github: v.optional(v.string()),
+        linkedin: v.optional(v.string()),
+        instagram: v.optional(v.string()),
+        order: v.number()
+    },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        const { token, id, ...data } = args;
+        if (id) {
+            await ctx.db.patch(id, data);
+            return id;
+        }
+        return await ctx.db.insert("connectsCards", data);
+    }
+});
+
+export const softDeleteConnectsCard = mutation({
+    args: { token: v.string(), id: v.id("connectsCards") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: true });
+    }
+});
+
+export const hardDeleteConnectsCard = mutation({
+    args: { token: v.string(), id: v.id("connectsCards") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.delete(args.id);
+    }
+});
+
+export const restoreConnectsCard = mutation({
+    args: { token: v.string(), id: v.id("connectsCards") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: false });
+    }
+});
+
 export const seedData = mutation({
     handler: async (ctx) => {
         // Only run if empty
@@ -482,6 +554,7 @@ export const getAllData = query({
         const patents = await ctx.db.query("patents").collect();
         const publications = await ctx.db.query("publications").collect();
         const videos = await ctx.db.query("videos").collect();
+        const connectsCards = await ctx.db.query("connectsCards").collect();
 
         return {
             experiences,
@@ -489,7 +562,8 @@ export const getAllData = query({
             projects,
             patents,
             publications,
-            videos
+            videos,
+            connectsCards
         };
     }
 });
@@ -504,6 +578,7 @@ export const importData = mutation({
             patents: v.optional(v.array(v.any())),
             publications: v.optional(v.array(v.any())),
             videos: v.optional(v.array(v.any())),
+            connectsCards: v.optional(v.array(v.any())),
         })
     },
     handler: async (ctx, args) => {
@@ -544,6 +619,12 @@ export const importData = mutation({
             for (const item of data.videos) {
                 const { _id, _creationTime, ...fields } = item;
                 await ctx.db.insert("videos", fields as any);
+            }
+        }
+        if (data.connectsCards) {
+            for (const item of data.connectsCards) {
+                const { _id, _creationTime, ...fields } = item;
+                await ctx.db.insert("connectsCards", fields as any);
             }
         }
 

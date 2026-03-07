@@ -10,6 +10,8 @@ import { AboutSection } from './components/AboutSection';
 import { VideosSection } from './components/VideosSection';
 import { ResumeViewer } from './components/ResumeViewer';
 import { ScrollButton } from './components/ScrollButton';
+import { SocialSidebar } from './components/SocialSidebar';
+import { ContactModal } from './components/ContactModal';
 import { ReactLenis } from 'lenis/react';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -76,6 +78,7 @@ const useActiveSectionTitle = (isResumeOpen: boolean) => {
 const MainPortfolio: React.FC = () => {
     const [showAboutDesktop, setShowAboutDesktop] = useState(false);
     const [isResumeOpen, setIsResumeOpen] = useState(false);
+    const [isContactOpen, setIsContactOpen] = useState(false);
 
     useActiveSectionTitle(isResumeOpen);
 
@@ -92,8 +95,13 @@ const MainPortfolio: React.FC = () => {
             touchMultiplier: 2,
             infinite: false,
         }}>
-            <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#131313] text-[#1a1a1a] dark:text-white font-[Manrope] transition-colors duration-300">
-                <Header onAboutClick={handleAboutClick} onNavClick={() => setIsResumeOpen(false)} />
+            <div className={`min-h-screen bg-[#FDFBF7] dark:bg-[#131313] text-[#1a1a1a] dark:text-white font-[Manrope] transition-colors duration-300 ${isContactOpen ? 'overflow-hidden' : ''}`}>
+                <Header
+                    onAboutClick={handleAboutClick}
+                    onNavClick={() => setIsResumeOpen(false)}
+                    isContactOpen={isContactOpen}
+                    onContactClick={() => setIsContactOpen(true)}
+                />
 
                 <main className="flex-col w-full pt-16">
                     {isResumeOpen ? (
@@ -107,11 +115,15 @@ const MainPortfolio: React.FC = () => {
                     )}
                     <Footer onNavClick={() => setIsResumeOpen(false)} />
                 </main>
+                <SocialSidebar />
                 <ScrollButton />
+                <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
             </div>
         </ReactLenis>
     );
 };
+
+import { Connects } from './pages/Connects';
 
 const App: React.FC = () => {
     return (
@@ -121,6 +133,9 @@ const App: React.FC = () => {
                     <Routes>
                         {/* Main Portfolio Route */}
                         <Route path="/" element={<MainPortfolio />} />
+
+                        {/* Public Digital Wallet */}
+                        <Route path="/connects" element={<Connects />} />
 
                         {/* Admin Routes */}
                         <Route path="/dashboard/login" element={<Login />} />

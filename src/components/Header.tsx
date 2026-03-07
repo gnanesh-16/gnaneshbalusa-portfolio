@@ -6,68 +6,13 @@ import { Icons } from './Icons';
 interface HeaderProps {
     onAboutClick?: () => void;
     onNavClick?: () => void;
+    isContactOpen?: boolean;
+    onContactClick?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
+export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick, isContactOpen, onContactClick }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [activeProfile, setActiveProfile] = useState('');
-    const [message, setMessage] = useState('');
-    const [isSent, setIsSent] = useState(false);
-    const [isSending, setIsSending] = useState(false);
-
     const lenis = useLenis();
-    const sendConvexMessage = useMutation(api.portfolio.sendMessage);
-
-    const handleSend = async () => {
-        if (!message.trim() || isSending) return;
-        setIsSending(true);
-
-        let locationData = '';
-        try {
-            const res = await fetch('https://ipapi.co/json/');
-            const data = await res.json();
-            locationData = JSON.stringify({
-                city: data.city,
-                region: data.region,
-                country: data.country_name,
-                ip: data.ip
-            });
-        } catch (e) {
-            console.error('Failed to fetch location data');
-        }
-
-        try {
-            await sendConvexMessage({
-                platform: activeProfile,
-                message: message.trim(),
-                locationData,
-                userAgent: navigator.userAgent
-            });
-        } catch (e) {
-            console.error('Failed to send message', e);
-        }
-
-        setIsSending(false);
-        setIsSent(true);
-
-        setTimeout(() => {
-            setMobileMenuOpen(false);
-            setIsSent(false);
-            setActiveProfile('');
-            setMessage('');
-        }, 3000);
-    };
-
-    const renderHighlightedText = (text: string) => {
-        const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
-        const parts = text.split(emailRegex);
-        return parts.map((part, i) => {
-            if (part.match(emailRegex)) {
-                return <span key={i} className="underline decoration-blue-400 font-medium text-blue-400 underline-offset-2">{part}</span>;
-            }
-            return <span key={i}>{part}</span>;
-        });
-    };
 
     const scrollToSection = (id: string) => {
         setMobileMenuOpen(false);
@@ -89,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
         <div className="fixed top-0 left-0 right-0 z-50 bg-[#FBF9F6]/68 dark:bg-[#131313]/68 backdrop-blur-md transition-all duration-300 border-b border-transparent dark:border-zinc-800">
             <header className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
                 {/* Logo and Name */}
-                <div className="flex items-center gap-2 cursor-pointer group" onClick={() => scrollToSection('hero')}>
+                <div className="flex-1 flex items-center gap-2 cursor-pointer group" onClick={() => scrollToSection('hero')}>
                     <div className="flex items-center gap-1">
                         <span className="text-[16px] font-bold tracking-tight text-[#1a1a1a] dark:text-[#f0f0f0]">Gnanesh</span>
                         <span className="text-[16px] font-bold tracking-tight text-[#1a1a1a] dark:text-[#f0f0f0]">Balusa</span>
@@ -97,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
                 </div>
 
                 {/* Desktop Nav */}
-                <div className="flex items-center gap-8 justify-center w-full">
+                <div className="flex items-center gap-6 justify-center">
                     <nav className="hidden md:flex items-center gap-6 text-[15px] font-medium text-[#5f5f5f] dark:text-[#a0a0a0]">
                         {[
                             { label: 'About', id: 'about' },
@@ -109,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
                             <button
                                 key={item.id}
                                 onClick={() => scrollToSection(item.id)}
-                                className="hover:text-[#1a1a1a] dark:hover:text-white transition-colors"
+                                className="hover:text-[#1a1a1a] dark:hover:text-white transition-colors whitespace-nowrap"
                             >
                                 {item.label}
                             </button>
@@ -117,132 +62,29 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onNavClick }) => {
                     </nav>
                 </div>
 
-                {/* Social Icons - Desktop Only */}
-                <div className="hidden md:flex items-center gap-4 ml-4">
-                    <a href="https://github.com/gnanesh-16" target="_blank" rel="noopener noreferrer" title="GitHub">
-                        <Icons.GitHub className="w-6 h-6 text-[#555] dark:text-[#b0b0b0] hover:text-[#1a1a1a] dark:hover:text-white cursor-pointer transition-colors" />
-                    </a>
-                    <a href="https://in.linkedin.com/in/gnaneshbalusa" target="_blank" rel="noopener noreferrer" title="LinkedIn">
-                        <Icons.LinkedIn className="w-6 h-6 text-[#555] dark:text-[#b0b0b0] hover:text-[#1a1a1a] dark:hover:text-white cursor-pointer transition-colors" />
-                    </a>
+                {/* Desktop "Contact Me" - Perfectly aligned with right-side portrait image in Hero section */}
+                <div className="flex-1 hidden md:flex justify-end relative">
+                    <button
+                        onClick={onContactClick}
+                        className={`font-medium text-[15px] hover:text-[#1a1a1a] dark:hover:text-white transition-all cursor-pointer whitespace-nowrap lg:mr-4 xl:mr-8 pb-1 ${isContactOpen
+                            ? 'text-[#1a1a1a] dark:text-white border-b-2 border-[#1a1a1a] dark:border-white'
+                            : 'text-[#5f5f5f] dark:text-[#a0a0a0] border-b-2 border-transparent'
+                            }`}
+                    >
+                        Contact Me
+                    </button>
                 </div>
 
                 {/* Hamburger for Mobile */}
                 <div className="md:hidden ml-auto flex items-center gap-4" style={{ position: 'absolute', right: 24 }}>
                     <div className="relative">
                         <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            onClick={onContactClick}
                             aria-label="Contact Me"
                             className="flex items-center justify-center p-2 rounded focus:outline-none text-[15px] font-bold text-[#1a1a1a] dark:text-[#f0f0f0] bg-transparent"
                         >
                             Contact Me
-                            <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </button>
-                        {mobileMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-80 rounded-lg shadow-lg border border-[#e5e5e5] dark:border-zinc-800 p-4 z-50 bg-[#131313] animate-in fade-in zoom-in-95 duration-200">
-                                {!activeProfile ? (
-                                    <>
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <button
-                                                className="flex items-center justify-between w-full p-2 hover:bg-white/5 rounded-lg transition-colors"
-                                                onClick={() => setActiveProfile('github')}
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <Icons.GitHub className="w-6 h-6 text-[#f0f0f0]" />
-                                                    <span className="font-medium text-[#f0f0f0]">GitHub</span>
-                                                </div>
-                                                <Icons.ChevronDown className="w-4 h-4 text-zinc-500 -rotate-90" />
-                                            </button>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                className="flex items-center justify-between w-full p-2 hover:bg-white/5 rounded-lg transition-colors"
-                                                onClick={() => setActiveProfile('linkedin')}
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <Icons.LinkedIn className="w-6 h-6 text-[#f0f0f0]" />
-                                                    <span className="font-medium text-[#f0f0f0]">LinkedIn</span>
-                                                </div>
-                                                <Icons.ChevronDown className="w-4 h-4 text-zinc-500 -rotate-90" />
-                                            </button>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="space-y-4 animate-in slide-in-from-right-2 duration-300">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                                {activeProfile === 'github' ? <Icons.GitHub className="w-4 h-4 text-zinc-400" /> : <Icons.LinkedIn className="w-4 h-4 text-zinc-400" />}
-                                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{activeProfile}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <a
-                                                    href={activeProfile === 'github' ? "https://github.com/gnanesh-16" : "https://in.linkedin.com/in/gnaneshbalusa"}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-[10px] text-zinc-500 hover:text-white transition-colors underline underline-offset-2"
-                                                >
-                                                    Click here to redirect to {activeProfile === 'github' ? 'GitHub' : 'LinkedIn'}
-                                                </a>
-                                                <button onClick={() => setActiveProfile('')} className="text-zinc-500 hover:text-white transition-colors">
-                                                    <Icons.X className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {!isSent ? (
-                                            <>
-                                                <div className="relative w-full h-24 rounded-lg border border-zinc-700 bg-zinc-800/50 overflow-hidden text-sm">
-                                                    {/* Background Highlighting Layer */}
-                                                    <div
-                                                        className="absolute inset-0 px-3 py-2 text-[#f0f0f0] whitespace-pre-wrap break-words pointer-events-none"
-                                                        aria-hidden="true"
-                                                    >
-                                                        {renderHighlightedText(message)}
-                                                        {/* Adding transparent space at end to make the cursor align properly if trailing spaces exist */}
-                                                        <span className="opacity-0"> </span>
-                                                    </div>
-
-                                                    {/* Foreground Textarea (Transparent text) */}
-                                                    <textarea
-                                                        maxLength={200}
-                                                        value={message}
-                                                        onChange={(e) => setMessage(e.target.value)}
-                                                        placeholder={message ? '' : 'Type your message...'}
-                                                        className="absolute inset-0 w-full h-full px-3 py-2 bg-transparent text-transparent caret-white focus:outline-none focus:border-white/20 resize-none transition-colors"
-                                                        spellCheck={false}
-                                                    />
-                                                </div>
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-[10px] text-zinc-500 font-bold uppercase">{message.length}/200</span>
-                                                    <button
-                                                        disabled={!message.trim() || isSending}
-                                                        onClick={handleSend}
-                                                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-colors disabled:opacity-50"
-                                                    >
-                                                        {isSending ? (
-                                                            <div className="w-3 h-3 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                                                        ) : (
-                                                            <Icons.Send className="w-3 h-3" />
-                                                        )}
-                                                        {isSending ? 'Sending...' : 'Send'}
-                                                    </button>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="py-8 text-center animate-in fade-in zoom-in-95 duration-500">
-                                                <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                    <Icons.Sun className="w-6 h-6 text-green-500" />
-                                                </div>
-                                                <h3 className="text-white font-bold text-sm mb-1">Message Sent</h3>
-                                                <p className="text-zinc-400 text-[11px] leading-relaxed">
-                                                    I'll get back to you within <span className="text-white font-bold">27 minutes</span> exactly.
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
                     </div>
                 </div>
             </header>

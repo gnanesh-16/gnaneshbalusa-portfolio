@@ -17,6 +17,22 @@ export default defineSchema({
         order: v.number(),
         isDeleted: v.optional(v.boolean()),
     }),
+    connectsCards: defineTable({
+        title: v.string(), // e.g. "Business Networking", "NY Mates"
+        colorFrom: v.optional(v.string()), // Gradient start e.g., "#2A2B2E"
+        colorTo: v.optional(v.string()),   // Gradient end e.g., "#121213"
+        name: v.string(),
+        role: v.string(),
+        company: v.string(),
+        email: v.string(),
+        phone: v.string(),
+        website: v.optional(v.string()),
+        github: v.optional(v.string()),
+        linkedin: v.optional(v.string()),
+        instagram: v.optional(v.string()),
+        order: v.number(),
+        isDeleted: v.optional(v.boolean()),
+    }),
     projects: defineTable({
         icon: v.string(),
         name: v.string(),

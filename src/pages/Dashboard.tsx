@@ -5,7 +5,7 @@ import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { Icons } from '../components/Icons';
 
-type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Videos' | 'Deleted' | 'ExportImport' | 'Analytics' | 'Settings' | 'ReplyDMs';
+type Tab = 'Experiences' | 'Writings' | 'Projects' | 'Patents' | 'Publications' | 'Videos' | 'Connects Cards' | 'Deleted' | 'ExportImport' | 'Analytics' | 'Settings' | 'ReplyDMs';
 
 // --- Generic Data List Component ---
 const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
@@ -79,6 +79,26 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
                 { name: 'title', label: 'Title' },
                 { name: 'url', label: 'YouTube URL' },
                 { name: 'description', label: 'Description' },
+                { name: 'order', label: 'Order', type: 'number' }
+            ];
+            break;
+        case 'Connects Cards':
+            getQuery = api.portfolio.getConnectsCards;
+            saveMut = api.portfolio.saveConnectsCard;
+            delMut = api.portfolio.softDeleteConnectsCard;
+            fields = [
+                { name: 'title', label: 'Card Title' },
+                { name: 'colorFrom', label: 'Gradient Start (Hex - e.g., #2A2B2E)' },
+                { name: 'colorTo', label: 'Gradient End (Hex - e.g., #121213)' },
+                { name: 'name', label: 'Full Name' },
+                { name: 'role', label: 'Role / Title' },
+                { name: 'company', label: 'Company' },
+                { name: 'email', label: 'Email' },
+                { name: 'phone', label: 'Phone' },
+                { name: 'website', label: 'Website (Optional)' },
+                { name: 'linkedin', label: 'LinkedIn Handle (Optional)' },
+                { name: 'github', label: 'GitHub Handle (Optional)' },
+                { name: 'instagram', label: 'Instagram Handle (Optional)' },
                 { name: 'order', label: 'Order', type: 'number' }
             ];
             break;
@@ -167,39 +187,120 @@ const DataList: React.FC<{ tab: Tab; token: string }> = ({ tab, token }) => {
             </div>
 
             {isAdding && (
-                <form onSubmit={handleSave} className="bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A] space-y-4 animate-in fade-in slide-in-from-top-4">
-                    <h4 className="font-semibold mb-4">{editingId ? 'Edit' : 'Add new'} {tab.slice(0, -1)}</h4>
+                <div className={`gap-6 ${tab === 'Connects Cards' ? 'grid grid-cols-1 xl:grid-cols-2' : ''}`}>
+                    <form onSubmit={handleSave} className={`bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A] space-y-4 animate-in fade-in slide-in-from-top-4 ${tab === 'Connects Cards' ? 'order-2 xl:order-1' : ''}`}>
+                        <h4 className="font-semibold mb-4">{editingId ? 'Edit' : 'Add new'} {tab === 'Connects Cards' ? 'Card' : tab.slice(0, -1)}</h4>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {fields.map(f => (
-                            <div key={f.name}>
-                                <label className="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-1.5 pl-1">{f.label}</label>
-                                {f.name === 'description' ? (
-                                    <textarea
-                                        value={formData[f.name] || ''}
-                                        onChange={e => setFormData({ ...formData, [f.name]: e.target.value })}
-                                        className="w-full bg-[#F5F5F7] dark:bg-[#2C2C2E] border border-[#D2D2D7] dark:border-[#38383A] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0066CC]"
-                                        rows={3}
-                                        required
-                                    />
-                                ) : (
-                                    <input
-                                        type={f.type || 'text'}
-                                        value={formData[f.name] || ''}
-                                        onChange={e => setFormData({ ...formData, [f.name]: f.type === 'number' ? Number(e.target.value) : e.target.value })}
-                                        className={`w-full h-12 bg-[#F5F5F7] dark:bg-[#2C2C2E] border border-[#D2D2D7] dark:border-[#38383A] rounded-xl px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0066CC] ${f.name === 'order' ? 'opacity-60 cursor-not-allowed' : ''}`}
-                                        required
-                                        readOnly={f.name === 'order'}
-                                    />
-                                )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {fields.map(f => (
+                                <div key={f.name}>
+                                    <label className="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-1.5 pl-1">{f.label}</label>
+                                    {f.name === 'description' ? (
+                                        <textarea
+                                            value={formData[f.name] || ''}
+                                            onChange={e => setFormData({ ...formData, [f.name]: e.target.value })}
+                                            className="w-full bg-[#F5F5F7] dark:bg-[#2C2C2E] border border-[#D2D2D7] dark:border-[#38383A] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0066CC]"
+                                            rows={3}
+                                            required
+                                        />
+                                    ) : (
+                                        <input
+                                            type={f.type || (f.name.startsWith('color') ? 'color' : 'text')}
+                                            value={formData[f.name] || (f.name === 'colorFrom' ? '#2A2B2E' : f.name === 'colorTo' ? '#121213' : '')}
+                                            onChange={e => setFormData({ ...formData, [f.name]: f.type === 'number' ? Number(e.target.value) : e.target.value })}
+                                            className={`w-full h-12 bg-[#F5F5F7] dark:bg-[#2C2C2E] border border-[#D2D2D7] dark:border-[#38383A] rounded-xl px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0066CC] ${f.name === 'order' ? 'opacity-60 cursor-not-allowed' : ''} ${f.name.startsWith('color') ? 'p-1 cursor-pointer' : ''}`}
+                                            required={!['website', 'github', 'linkedin', 'instagram'].includes(f.name)}
+                                            readOnly={f.name === 'order'}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        <button type="submit" className="px-6 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm font-medium hover:opacity-80 transition-opacity mt-4">
+                            {editingId ? 'Update Item' : 'Save Item'}
+                        </button>
+                    </form>
+
+                    {tab === 'Connects Cards' && (
+                        <div className="bg-[#F5F5F7]/50 dark:bg-[#1C1C1E]/50 p-6 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A] flex flex-col items-center justify-center animate-in fade-in slide-in-from-top-4 order-1 xl:order-2 py-10 overflow-hidden relative">
+                            <h4 className="absolute top-6 left-6 font-semibold mb-4 text-[#86868B] z-10">Live Preview</h4>
+
+                            {/* Card Wrapper for scaling */}
+                            <div className="w-full max-w-[380px] mx-auto transform scale-[0.85] sm:scale-100 origin-center transition-transform">
+                                <div
+                                    className="relative w-full h-[380px] rounded-[32px] border-t border-white/20 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col text-white backdrop-blur-xl"
+                                    style={{
+                                        background: `linear-gradient(to bottom, ${formData.colorFrom || '#2A2B2E'}, ${formData.colorTo || '#121213'})`
+                                    }}
+                                >
+                                    {/* Top Card Header */}
+                                    <div className="absolute top-0 inset-x-0 p-6 flex items-start justify-between z-20">
+                                        <div className="flex items-center gap-2 font-medium tracking-wide">
+                                            <Icons.Award className="w-5 h-5 text-white" />
+                                            {formData.title || 'Card Title'}
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom Content Area */}
+                                    <div className="mt-auto p-6 md:p-8 flex items-end justify-between z-20 w-full pb-8">
+                                        <div className="flex flex-col gap-0.5">
+                                            <h2 className="text-[26px] font-bold tracking-tight mb-2 truncate max-w-[180px]">{formData.name || 'Your Name'}</h2>
+                                            <p className="text-[#a1a1a6] text-sm truncate max-w-[180px]">{formData.role || 'Your Role'}</p>
+                                            <p className="text-[#a1a1a6] text-sm mb-4 truncate max-w-[180px]">{formData.company || 'Your Company'}</p>
+
+                                            <div className="flex items-center gap-3">
+                                                {formData.linkedin && (
+                                                    <div className="w-6 h-6 rounded flex items-center justify-center text-[#0A66C2] bg-white">
+                                                        <Icons.LinkedIn className="w-4 h-4" />
+                                                    </div>
+                                                )}
+                                                {formData.email && (
+                                                    <div className="w-6 h-6 rounded flex items-center justify-center text-white bg-gradient-to-tr from-[#FD1D1D] to-[#F56040]">
+                                                        <Icons.Mail className="w-3.5 h-3.5" />
+                                                    </div>
+                                                )}
+                                                {formData.github && (
+                                                    <div className="w-6 h-6 rounded flex items-center justify-center text-white bg-black">
+                                                        <Icons.GitHub className="w-4 h-4" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white p-2 rounded-xl shrink-0 w-[100px] h-[100px] ml-4">
+                                            <svg viewBox="0 0 100 100" className="w-full h-full text-black" fill="currentColor">
+                                                <rect x="5" y="5" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="3" />
+                                                <rect x="10" y="10" width="15" height="15" />
+                                                <rect x="70" y="5" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="3" />
+                                                <rect x="75" y="10" width="15" height="15" />
+                                                <rect x="5" y="70" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="3" />
+                                                <rect x="10" y="75" width="15" height="15" />
+                                                <rect x="40" y="5" width="20" height="10" />
+                                                <rect x="5" y="40" width="10" height="20" />
+                                                <rect x="25" y="45" width="15" height="15" />
+                                                <rect x="45" y="25" width="10" height="20" />
+                                                <rect x="65" y="40" width="15" height="10" />
+                                                <rect x="85" y="45" width="10" height="15" />
+                                                <rect x="40" y="55" width="20" height="10" />
+                                                <rect x="70" y="65" width="25" height="10" />
+                                                <rect x="55" y="75" width="10" height="20" />
+                                                <rect x="80" y="85" width="15" height="10" />
+                                                <rect x="70" y="80" width="5" height="15" />
+                                                <rect x="40" y="80" width="10" height="15" />
+                                                <rect x="35" y="65" width="5" height="5" />
+                                                <rect x="60" y="15" width="5" height="5" />
+                                                <rect x="20" y="32" width="15" height="5" />
+                                                <rect x="45" y="45" width="15" height="5" />
+                                                <rect x="80" y="35" width="15" height="5" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        ))}
-                    </div>
-
-                    <button type="submit" className="px-6 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm font-medium hover:opacity-80 transition-opacity mt-2">
-                        {editingId ? 'Update Item' : 'Save Item'}
-                    </button>
-                </form>
+                        </div>
+                    )}
+                </div>
             )}
 
             <div className="space-y-4 max-h-[660px] overflow-y-auto pr-2 custom-scrollbar">
@@ -288,7 +389,7 @@ export const Dashboard: React.FC = () => {
                 </div>
 
                 <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-2">
-                    {(['Experiences', 'Writings', 'Projects', 'Patents', 'Publications', 'Videos'] as Tab[]).map((tab) => {
+                    {(['Experiences', 'Writings', 'Projects', 'Patents', 'Publications', 'Videos', 'Connects Cards'] as Tab[]).map((tab) => {
                         let IconComponent;
                         switch (tab) {
                             case 'Experiences': IconComponent = Icons.Briefcase; break;
@@ -297,6 +398,7 @@ export const Dashboard: React.FC = () => {
                             case 'Patents': IconComponent = Icons.Award; break;
                             case 'Publications': IconComponent = Icons.BookOpen; break;
                             case 'Videos': IconComponent = Icons.YouTube; break;
+                            case 'Connects Cards': IconComponent = Icons.Award; break;
                             default: IconComponent = Icons.Layers;
                         }
 
@@ -468,6 +570,7 @@ const AnalyticsView: React.FC<{ token: string }> = ({ token }) => {
         { label: 'Patents', count: allData?.patents.length || 0 },
         { label: 'Publications', count: allData?.publications.length || 0 },
         { label: 'Videos', count: allData?.videos?.length || 0 },
+        { label: 'Connects Cards', count: allData?.connectsCards?.length || 0 },
     ];
 
     const total = stats.reduce((acc, curr) => acc + curr.count, 0);
@@ -592,6 +695,7 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
     const deletedPatents = useQuery(api.portfolio.getDeletedPatents) || [];
     const deletedPublications = useQuery(api.portfolio.getDeletedPublications) || [];
     const deletedVideos = useQuery(api.portfolio.getDeletedVideos) || [];
+    const deletedConnectsCards = useQuery(api.portfolio.getDeletedConnectsCards) || [];
 
     const restoreExp = useMutation(api.portfolio.restoreExperience);
     const hardDelExp = useMutation(api.portfolio.hardDeleteExperience);
@@ -605,6 +709,8 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
     const hardDelPub = useMutation(api.portfolio.hardDeletePublication);
     const restoreVid = useMutation(api.portfolio.restoreVideo);
     const hardDelVid = useMutation(api.portfolio.hardDeleteVideo);
+    const restoreConnectsCard = useMutation(api.portfolio.restoreConnectsCard);
+    const hardDelConnectsCard = useMutation(api.portfolio.hardDeleteConnectsCard);
 
     const [deleteClicks, setDeleteClicks] = useState<Record<string, number>>({});
 
@@ -616,6 +722,7 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
             case 'Patents': await restorePat({ token, id: id as any }); break;
             case 'Publications': await restorePub({ token, id: id as any }); break;
             case 'Videos': await restoreVid({ token, id: id as any }); break;
+            case 'Connects Cards': await restoreConnectsCard({ token, id: id as any }); break;
         }
     };
 
@@ -630,6 +737,7 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
                 case 'Patents': await hardDelPat({ token, id: id as any }); break;
                 case 'Publications': await hardDelPub({ token, id: id as any }); break;
                 case 'Videos': await hardDelVid({ token, id: id as any }); break;
+                case 'Connects Cards': await hardDelConnectsCard({ token, id: id as any }); break;
             }
             const newClicks = { ...deleteClicks };
             delete newClicks[id];
@@ -652,7 +760,8 @@ const DeletedList: React.FC<{ token: string }> = ({ token }) => {
         ...deletedProjects.map(i => ({ ...i, type: 'Projects' })),
         ...deletedPatents.map(i => ({ ...i, type: 'Patents' })),
         ...deletedPublications.map(i => ({ ...i, type: 'Publications' })),
-        ...deletedVideos.map(i => ({ ...i, type: 'Videos' }))
+        ...deletedVideos.map(i => ({ ...i, type: 'Videos' })),
+        ...deletedConnectsCards.map(i => ({ ...i, type: 'Connects Cards' }))
     ].sort((a, b) => b._creationTime - a._creationTime);
 
     return (
