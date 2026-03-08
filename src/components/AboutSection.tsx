@@ -86,28 +86,28 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
             logo: '/brand-assets/amazonlogo-.png',
             period: '2025 -',
             role: 'DS Machine Learning Associate 2',
-            description: 'Building AI-powered solutions that translate complex data into measurable business outcomes. My work centers on developing systems that remain robust at scale while preserving the nuance required for real-world deployment.'
+            description: 'Shipping ML systems at Amazon scale — from feature engineering to model deployment across Tier-1 workflows. Focused on latency-sensitive inference pipelines, automated quality signals, and reducing human review overhead by double digits.'
         },
         {
             company: 'McKinsey & Company',
             logo: '/brand-assets/mcksiney&coampnt-logo.png',
             period: '2024 - 2025',
             role: 'Business Analyst',
-            description: 'Guided cross-functional teams through data analysis initiatives that reshaped how the organization captures and interprets information. Applied structured problem-solving frameworks to inform executive strategy.'
+            description: 'Owned quantitative analysis workstreams for Fortune 500 engagements — turning messy datasets into board-ready insights. Translated ambiguous problem spaces into structured hypotheses, cutting time-to-recommendation by weeks.'
         },
         {
             company: 'TiHAN IIT Hyderabad',
             logo: '/brand-assets/iith-logo.png',
             period: '2024 - 2024',
             role: 'AI Research Software Engineer',
-            description: 'Designed and implemented AI/ML systems with an emphasis on production readiness. Balanced research ambition with engineering pragmatism to deliver solutions that meet demanding performance requirements.'
+            description: 'Built and benchmarked real-time perception models for autonomous vehicle testbeds at IIT Hyderabad. Bridged the gap between research prototypes and field-deployable systems — shipping models that ran reliably under hardware constraints.'
         },
         {
             company: 'Microsoft',
             logo: '/brand-assets/microsoftlogo.png',
             period: '2024 - 2024',
             role: 'Microsoft Student Ambassador',
-            description: 'Led community initiatives that brought emerging technologies to peers through hands-on workshops and collaborative projects. Fostered an environment where curiosity and technical rigor could coexist.'
+            description: 'Represented Microsoft across campus events, hackathons, and developer workshops — helping 500+ students ship their first cloud and AI projects. Built a peer learning pipeline that outlasted the role.'
         }
     ];
 
@@ -202,10 +202,10 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
     }));
 
     const experienceStats: Record<string, { tenure: string; impact: string; shipped: string }> = {
-        'Amazon': { tenure: '13 mo', impact: '47,770', shipped: '4,061' },
-        'McKinsey & Company': { tenure: '21 mo', impact: '28,410', shipped: '2,194' },
-        'TiHAN IIT Hyderabad': { tenure: '17 mo', impact: '19,860', shipped: '1,652' },
-        'Microsoft': { tenure: '9 mo', impact: '12,340', shipped: '1,048' },
+        'Amazon': { tenure: '12 mo', impact: '47,770', shipped: '4,061' },
+        'McKinsey & Company': { tenure: '3 mo', impact: '28,410', shipped: '2,194' },
+        'TiHAN IIT Hyderabad': { tenure: '7 mo', impact: '19,860', shipped: '1,652' },
+        'Microsoft': { tenure: '14 mo', impact: '12,340', shipped: '1,048' },
     };
 
     const getStats = (company: string, index: number) => {
@@ -321,90 +321,65 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
             <section id="experience" className="py-24">
                 <div className="max-w-[1200px] mx-auto px-6">
                     <h2 className="text-3xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] mb-12">Experience</h2>
-                    {/* Mobile: previous layout */}
-                    <div className="grid grid-cols-1 gap-y-12 md:hidden">
+                    {/* All screens: hover card design */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                         {experiences.map((exp, index) => (
-                            <div key={index} className="space-y-4">
-                                <div className="text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase">
-                                    {exp.period}
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <img
-                                        src={exp.logo}
-                                        alt={`${exp.company} logo`}
-                                        className={`${exp.company === 'Microsoft' ? 'w-8 h-8' : 'w-12 h-12'} rounded-md object-contain`}
-                                    />
-                                    <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0]">{exp.company}</h3>
-                                </div>
-                                <div className="text-sm font-medium text-[#444] dark:text-[#b0b0b0]">{exp.role}</div>
-                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
-                                    {exp.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Desktop: hover card design */}
-                    <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {experiences.map((exp, index) => (
-                            <article key={index} className="group relative min-h-[360px] rounded-2xl border border-[#e5e5e5] dark:border-zinc-800 bg-[#f8f8f8] dark:bg-[#1a1a1a] overflow-hidden">
-                                <div className="absolute inset-0 p-5 flex flex-col transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-1">
-                                    <div className="h-[170px] rounded-xl border border-[#e5e5e5] dark:border-zinc-800 bg-white dark:bg-[#121212] flex items-center justify-center">
+                            <article key={index} className="group relative min-h-[280px] md:min-h-[360px] rounded-2xl border border-[#e5e5e5] dark:border-zinc-800 bg-[#f8f8f8] dark:bg-[#1a1a1a] overflow-hidden">
+                                {/* Idle state */}
+                                <div className="absolute inset-0 p-3 md:p-5 flex flex-col transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-1">
+                                    <div className="h-[120px] md:h-[170px] rounded-md bg-[#121212] dark:bg-[#0d0d0d] flex items-center justify-center">
                                         <img
                                             src={exp.logo}
                                             alt={`${exp.company} logo`}
-                                            className={`${exp.company === 'Microsoft' ? 'w-16 h-16' : 'w-20 h-20'} object-contain`}
+                                            className={`${exp.company === 'Microsoft' ? 'w-16 h-16 md:w-24 md:h-24' : 'w-20 h-20 md:w-28 md:h-28'} object-contain`}
                                         />
                                     </div>
 
-                                    <h3 className="mt-4 text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] leading-tight">
+                                    <h3 className="mt-3 text-xs md:text-base font-bold text-[#1a1a1a] dark:text-[#f0f0f0] leading-snug text-center line-clamp-2">
                                         {exp.company}
                                     </h3>
 
-                                    <div className="mt-auto grid grid-cols-3 gap-2 pt-4 border-t border-[#e5e5e5] dark:border-zinc-800">
-                                        <div className="text-center space-y-1">
-                                            <div className="flex items-center justify-center gap-1 text-[#1a1a1a] dark:text-[#f0f0f0]">
-                                                <Icons.Clock className="w-4 h-4" />
-                                                <span className="text-sm font-black">{getStats(exp.company, index).tenure}</span>
-                                            </div>
-                                            <div className="text-[10px] uppercase tracking-wider text-[#86868b] font-semibold">Tenure</div>
+                                    <div className="mt-auto flex items-center justify-between pt-3 border-t border-[#e5e5e5] dark:border-zinc-800">
+                                        <div className="flex items-center gap-0.5 md:gap-1 text-[#1a1a1a] dark:text-[#f0f0f0]">
+                                            <Icons.Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-[#86868b] flex-shrink-0" />
+                                            <span className="text-[10px] md:text-xs font-bold whitespace-nowrap">{getStats(exp.company, index).tenure}</span>
                                         </div>
-                                        <div className="text-center border-x border-[#e5e5e5] dark:border-zinc-800 space-y-1">
-                                            <div className="flex items-center justify-center gap-1 text-[#1a1a1a] dark:text-[#f0f0f0]">
-                                                <Icons.Eye className="w-4 h-4" />
-                                                <span className="text-sm font-black">{getStats(exp.company, index).impact}</span>
-                                            </div>
-                                            <div className="text-[10px] uppercase tracking-wider text-[#86868b] font-semibold">Impact</div>
+                                        <div className="flex items-center gap-0.5 md:gap-1 text-[#1a1a1a] dark:text-[#f0f0f0]">
+                                            <Icons.Eye className="w-3 h-3 md:w-3.5 md:h-3.5 text-[#86868b] flex-shrink-0" />
+                                            <span className="text-[10px] md:text-xs font-bold whitespace-nowrap">{getStats(exp.company, index).impact}</span>
                                         </div>
-                                        <div className="text-center space-y-1">
-                                            <div className="flex items-center justify-center gap-1 text-[#1a1a1a] dark:text-[#f0f0f0]">
-                                                <Icons.GitBranch className="w-4 h-4" />
-                                                <span className="text-sm font-black">{getStats(exp.company, index).shipped}</span>
-                                            </div>
-                                            <div className="text-[10px] uppercase tracking-wider text-[#86868b] font-semibold">Shipped</div>
+                                        <div className="flex items-center gap-0.5 md:gap-1 text-[#1a1a1a] dark:text-[#f0f0f0]">
+                                            <Icons.GitBranch className="w-3 h-3 md:w-3.5 md:h-3.5 text-[#86868b] flex-shrink-0" />
+                                            <span className="text-[10px] md:text-xs font-bold whitespace-nowrap">{getStats(exp.company, index).shipped}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="absolute inset-0 p-5 flex flex-col opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-                                    <div className="text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase mb-3">
-                                        {exp.period}
+                                {/* Hover state */}
+                                <div className="absolute inset-0 p-3 md:p-5 flex flex-col opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+                                    {/* Period — top right */}
+                                    <div className="flex justify-end mb-2">
+                                        <span className="text-[10px] md:text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase whitespace-nowrap">
+                                            {exp.period}
+                                        </span>
                                     </div>
 
-                                    <div className="flex items-center gap-3 mb-3">
-                                    <img
-                                        src={exp.logo}
-                                        alt={`${exp.company} logo`}
-                                        className={`${exp.company === 'Microsoft' ? 'w-7 h-7' : 'w-10 h-10'} rounded-md object-contain`}
-                                    />
-                                    <h3 className="text-lg font-bold text-[#1a1a1a] dark:text-[#f0f0f0]">{exp.company}</h3>
-                                </div>
+                                    {/* Logo + company name — single line */}
+                                    <div className="flex items-center gap-1.5 md:gap-2 mb-2 min-w-0">
+                                        <img
+                                            src={exp.logo}
+                                            alt={`${exp.company} logo`}
+                                            className={`${exp.company === 'Microsoft' ? 'w-5 h-5 md:w-6 md:h-6' : 'w-6 h-6 md:w-8 md:h-8'} rounded-sm object-contain flex-shrink-0`}
+                                        />
+                                        <h3 className="text-xs md:text-sm font-bold text-[#1a1a1a] dark:text-[#f0f0f0] whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
+                                            {exp.company}
+                                        </h3>
+                                    </div>
 
-                                <div className="text-sm font-medium text-[#444] dark:text-[#b0b0b0] mb-2">{exp.role}</div>
-                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0] line-clamp-6">
-                                    {exp.description}
-                                </p>
-
+                                    <div className="text-xs md:text-sm font-medium text-[#444] dark:text-[#b0b0b0] mb-1.5">{exp.role}</div>
+                                    <p className="text-[11px] md:text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0] line-clamp-5 md:line-clamp-6">
+                                        {exp.description}
+                                    </p>
                                 </div>
                             </article>
                         ))}
