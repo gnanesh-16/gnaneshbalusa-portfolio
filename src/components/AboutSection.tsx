@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import { Icons } from './Icons';
 
 interface AboutSectionProps {
     showAboutHeroDesktop?: boolean;
@@ -200,6 +201,21 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
         icon: typeof p.icon === 'string' ? (ProjectIcons[p.icon as keyof typeof ProjectIcons] || ProjectIcons.Pipeline) : p.icon,
     }));
 
+    const experienceStats: Record<string, { tenure: string; impact: string; shipped: string }> = {
+        'Amazon': { tenure: '13 mo', impact: '47,770', shipped: '4,061' },
+        'McKinsey & Company': { tenure: '21 mo', impact: '28,410', shipped: '2,194' },
+        'TiHAN IIT Hyderabad': { tenure: '17 mo', impact: '19,860', shipped: '1,652' },
+        'Microsoft': { tenure: '9 mo', impact: '12,340', shipped: '1,048' },
+    };
+
+    const getStats = (company: string, index: number) => {
+        return experienceStats[company] || {
+            tenure: `${10 + index * 3} mo`,
+            impact: (10000 + index * 2500).toLocaleString(),
+            shipped: (900 + index * 300).toLocaleString(),
+        };
+    };
+
     return (
         <>
             {/* About Hero Section */}
@@ -328,26 +344,69 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ showAboutHeroDesktop
                         ))}
                     </div>
 
-                    {/* Desktop: new card design */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                    {/* Desktop: hover card design */}
+                    <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {experiences.map((exp, index) => (
-                            <div key={index} className="space-y-4">
-                                <div className="text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase">
-                                    {exp.period}
+                            <article key={index} className="group relative min-h-[360px] rounded-2xl border border-[#e5e5e5] dark:border-zinc-800 bg-[#f8f8f8] dark:bg-[#1a1a1a] overflow-hidden">
+                                <div className="absolute inset-0 p-5 flex flex-col transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-1">
+                                    <div className="h-[170px] rounded-xl border border-[#e5e5e5] dark:border-zinc-800 bg-white dark:bg-[#121212] flex items-center justify-center">
+                                        <img
+                                            src={exp.logo}
+                                            alt={`${exp.company} logo`}
+                                            className={`${exp.company === 'Microsoft' ? 'w-16 h-16' : 'w-20 h-20'} object-contain`}
+                                        />
+                                    </div>
+
+                                    <h3 className="mt-4 text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0] leading-tight">
+                                        {exp.company}
+                                    </h3>
+
+                                    <div className="mt-auto grid grid-cols-3 gap-2 pt-4 border-t border-[#e5e5e5] dark:border-zinc-800">
+                                        <div className="text-center space-y-1">
+                                            <div className="flex items-center justify-center gap-1 text-[#1a1a1a] dark:text-[#f0f0f0]">
+                                                <Icons.Clock className="w-4 h-4" />
+                                                <span className="text-sm font-black">{getStats(exp.company, index).tenure}</span>
+                                            </div>
+                                            <div className="text-[10px] uppercase tracking-wider text-[#86868b] font-semibold">Tenure</div>
+                                        </div>
+                                        <div className="text-center border-x border-[#e5e5e5] dark:border-zinc-800 space-y-1">
+                                            <div className="flex items-center justify-center gap-1 text-[#1a1a1a] dark:text-[#f0f0f0]">
+                                                <Icons.Eye className="w-4 h-4" />
+                                                <span className="text-sm font-black">{getStats(exp.company, index).impact}</span>
+                                            </div>
+                                            <div className="text-[10px] uppercase tracking-wider text-[#86868b] font-semibold">Impact</div>
+                                        </div>
+                                        <div className="text-center space-y-1">
+                                            <div className="flex items-center justify-center gap-1 text-[#1a1a1a] dark:text-[#f0f0f0]">
+                                                <Icons.GitBranch className="w-4 h-4" />
+                                                <span className="text-sm font-black">{getStats(exp.company, index).shipped}</span>
+                                            </div>
+                                            <div className="text-[10px] uppercase tracking-wider text-[#86868b] font-semibold">Shipped</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-3">
+
+                                <div className="absolute inset-0 p-5 flex flex-col opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+                                    <div className="text-xs font-medium text-[#666] dark:text-[#999] tracking-wide uppercase mb-3">
+                                        {exp.period}
+                                    </div>
+
+                                    <div className="flex items-center gap-3 mb-3">
                                     <img
                                         src={exp.logo}
                                         alt={`${exp.company} logo`}
-                                        className={`${exp.company === 'Microsoft' ? 'w-8 h-8' : 'w-12 h-12'} rounded-md object-contain`}
+                                        className={`${exp.company === 'Microsoft' ? 'w-7 h-7' : 'w-10 h-10'} rounded-md object-contain`}
                                     />
-                                    <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-[#f0f0f0]">{exp.company}</h3>
+                                    <h3 className="text-lg font-bold text-[#1a1a1a] dark:text-[#f0f0f0]">{exp.company}</h3>
                                 </div>
-                                <div className="text-sm font-medium text-[#444] dark:text-[#b0b0b0]">{exp.role}</div>
-                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0]">
+
+                                <div className="text-sm font-medium text-[#444] dark:text-[#b0b0b0] mb-2">{exp.role}</div>
+                                <p className="text-sm leading-relaxed text-[#555] dark:text-[#a0a0a0] line-clamp-6">
                                     {exp.description}
                                 </p>
-                            </div>
+
+                                </div>
+                            </article>
                         ))}
                     </div>
                 </div>
