@@ -955,3 +955,85 @@ export const setBookingStatus = mutation({
     }
 });
 
+// ─────────────────────────────── Courses ───────────────────────────────
+
+export const getCourses = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("courses")
+            .filter((q) => q.neq(q.field("isDeleted"), true))
+            .collect();
+        return items.sort((a, b) => a.order - b.order);
+    }
+});
+
+export const getPublishedCourses = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("courses")
+            .filter((q) => q.neq(q.field("isDeleted"), true))
+            .collect();
+        return items
+            .filter(i => (i.status ?? 'published') === 'published')
+            .sort((a, b) => a.order - b.order);
+    }
+});
+
+export const getDeletedCourses = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("courses")
+            .filter((q) => q.eq(q.field("isDeleted"), true))
+            .collect();
+        return items;
+    }
+});
+
+export const saveCourse = mutation({
+    args: {
+        token: v.string(),
+        id: v.optional(v.id("courses")),
+        title: v.string(),
+        description: v.string(),
+        thumbnail: v.optional(v.string()),
+        instructor: v.optional(v.string()),
+        level: v.optional(v.string()),
+        category: v.optional(v.string()),
+        sessions: v.optional(v.string()),
+        duration: v.optional(v.string()),
+        prerequisites: v.optional(v.string()),
+        link: v.optional(v.string()),
+        status: v.optional(v.string()),
+        order: v.number(),
+    },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        const { token, id, ...data } = args;
+        if (id) {
+            await ctx.db.patch(id, data);
+            return id;
+        }
+        return await ctx.db.insert("courses", data);
+    }
+});
+
+export const softDeleteCourse = mutation({
+    args: { token: v.string(), id: v.id("courses") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: true });
+    }
+});
+
+export const hardDeleteCourse = mutation({
+    args: { token: v.string(), id: v.id("courses") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.delete(args.id);
+    }
+});
+
+export const restoreCourse = mutation({
+    args: { token: v.string(), id: v.id("courses") },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+        await ctx.db.patch(args.id, { isDeleted: false });
+    }
+});

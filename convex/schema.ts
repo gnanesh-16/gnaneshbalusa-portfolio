@@ -90,5 +90,20 @@ export default defineSchema({
         status: v.union(v.literal('pending'), v.literal('approved'), v.literal('rejected')),
         createdAt: v.number(),
     }),
+    courses: defineTable({
+        title: v.string(),
+        description: v.string(),
+        thumbnail: v.optional(v.string()),       // image URL
+        instructor: v.optional(v.string()),
+        level: v.optional(v.string()),            // Beginner | Intermediate | Advanced
+        category: v.optional(v.string()),         // AI/ML | Web Dev | etc.
+        sessions: v.optional(v.string()),         // newline-separated list of session titles
+        duration: v.optional(v.string()),         // e.g. "8 weeks" | "10 hours"
+        prerequisites: v.optional(v.string()),
+        link: v.optional(v.string()),             // external url or internal path
+        status: v.optional(v.string()),           // "published" | "draft"
+        order: v.number(),
+        isDeleted: v.optional(v.boolean()),
+    }),
 
 });

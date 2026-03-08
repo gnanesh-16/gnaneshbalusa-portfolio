@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
@@ -908,6 +908,16 @@ export const Dashboard: React.FC = () => {
                         <Icons.Briefcase className={`w-5 h-5 flex-shrink-0 ${activeTab === 'Calendly' ? 'opacity-100' : 'opacity-70'}`} />
                         <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} truncate`}>Calendly</span>
                     </button>
+
+                    {/* Courses */}
+                    <Link
+                        to="/dashboard/courseadding"
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium text-[#555] dark:text-[#a0a0a0] hover:bg-black/5 dark:hover:bg-white/10 ${!sidebarOpen ? 'justify-center' : ''}`}
+                        title={!sidebarOpen ? 'Courses' : undefined}
+                    >
+                        <Icons.BookOpen className="w-5 h-5 flex-shrink-0 opacity-70" />
+                        <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} truncate`}>Courses</span>
+                    </Link>
 
                     {/* Settings Tabs */}
                     <button

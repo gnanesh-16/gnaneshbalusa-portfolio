@@ -140,6 +140,8 @@ const MainPortfolio: React.FC = () => {
 };
 
 import { Connects } from './pages/Connects';
+import { CoursesByGnanesh } from './pages/CoursesByGnanesh';
+import { CourseAdding } from './pages/CourseAdding';
 
 const App: React.FC = () => {
     if (!convex) {
@@ -167,9 +169,13 @@ const App: React.FC = () => {
                         {/* Public Digital Wallet */}
                         <Route path="/connects" element={<Connects />} />
 
+                        {/* Public Courses */}
+                        <Route path="/coursesbygnanesh" element={<CoursesByGnanesh />} />
+
                         {/* Admin Routes */}
                         <Route path="/dashboard/login" element={<Login />} />
                         <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/dashboard/courseadding" element={<CourseAdding />} />
                     </Routes>
                 </BrowserRouter>
                 <Analytics />
