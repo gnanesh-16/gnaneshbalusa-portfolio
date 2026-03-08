@@ -1,10 +1,43 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 const verifyToken = (token: string) => {
     if (token !== "admin_session_valid_token_777") {
         throw new Error("Unauthorized access");
     }
+};
+
+const parseTimeToMinutes = (time: string) => {
+    const trimmed = time.trim();
+    const ampmMatch = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (ampmMatch) {
+        let hours = Number(ampmMatch[1]);
+        const minutes = Number(ampmMatch[2]);
+        const period = ampmMatch[3].toUpperCase();
+        if (Number.isNaN(hours) || Number.isNaN(minutes) || minutes < 0 || minutes > 59 || hours < 1 || hours > 12) {
+            return null;
+        }
+        if (period === "AM" && hours === 12) hours = 0;
+        if (period === "PM" && hours !== 12) hours += 12;
+        return hours * 60 + minutes;
+    }
+
+    const basicMatch = trimmed.match(/^(\d{1,2}):(\d{2})$/);
+    if (!basicMatch) return null;
+    const hours = Number(basicMatch[1]);
+    const minutes = Number(basicMatch[2]);
+    if (Number.isNaN(hours) || Number.isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+        return null;
+    }
+    return hours * 60 + minutes;
+};
+
+const minutesToTime = (value: number) => {
+    const safe = ((value % (24 * 60)) + (24 * 60)) % (24 * 60);
+    const hours = Math.floor(safe / 60);
+    const minutes = safe % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 };
 
 // --- Experiences ---
@@ -693,10 +726,7 @@ export const getAvailableSlots = query({
     handler: async (ctx) => {
         return await ctx.db
             .query("availableSlots")
-            .filter(q => q.and(
-                q.neq(q.field("isBooked"), true),
-                q.neq(q.field("isDeleted"), true)
-            ))
+            .filter(q => q.neq(q.field("isDeleted"), true))
             .collect();
     }
 });
@@ -718,15 +748,76 @@ export const createSlot = mutation({
         date: v.string(),
         startTime: v.string(),
         endTime: v.string(),
+        frequencyMins: v.optional(v.number()),
     },
     handler: async (ctx, args) => {
         verifyToken(args.token);
-        await ctx.db.insert("availableSlots", {
-            date: args.date,
-            startTime: args.startTime,
-            endTime: args.endTime,
-            isBooked: false,
-        });
+
+        const startMinutes = parseTimeToMinutes(args.startTime);
+        const endMinutes = parseTimeToMinutes(args.endTime);
+
+        if (startMinutes === null || endMinutes === null) {
+            throw new Error("Invalid time format");
+        }
+        if (endMinutes <= startMinutes) {
+            throw new Error("End time must be after start time");
+        }
+
+        const frequency = args.frequencyMins ?? 1;
+        if (!Number.isInteger(frequency) || frequency <= 0 || frequency > 120) {
+            throw new Error("Invalid frequency");
+        }
+
+        const existing = await ctx.db
+            .query("availableSlots")
+            .filter(q => q.and(
+                q.eq(q.field("date"), args.date),
+                q.neq(q.field("isDeleted"), true)
+            ))
+            .collect();
+
+        const existingStarts = new Set(
+            existing
+                .map(slot => parseTimeToMinutes(slot.startTime))
+                .filter((value): value is number => value !== null)
+        );
+
+        for (let minute = startMinutes; minute <= endMinutes; minute += frequency) {
+            if (existingStarts.has(minute)) continue;
+            await ctx.db.insert("availableSlots", {
+                date: args.date,
+                startTime: minutesToTime(minute),
+                endTime: minutesToTime(minute + Math.max(1, frequency)),
+                isBooked: false,
+            });
+        }
+    }
+});
+
+export const bulkDeleteSlots = mutation({
+    args: {
+        token: v.string(),
+        dates: v.optional(v.array(v.string())),
+    },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+
+        const allSlots = await ctx.db
+            .query("availableSlots")
+            .filter(q => q.neq(q.field("isDeleted"), true))
+            .collect();
+
+        const dateFilter = args.dates && args.dates.length > 0 ? new Set(args.dates) : null;
+        let deletedCount = 0;
+
+        for (const slot of allSlots) {
+            if (slot.isBooked) continue;
+            if (dateFilter && !dateFilter.has(slot.date)) continue;
+            await ctx.db.patch(slot._id, { isDeleted: true });
+            deletedCount += 1;
+        }
+
+        return { deletedCount };
     }
 });
 
@@ -812,6 +903,55 @@ export const updateBooking = mutation({
         if (args.gmeetLink !== undefined) patch.gmeetLink = args.gmeetLink;
         if (args.meetType !== undefined) patch.meetType = args.meetType;
         await ctx.db.patch(args.requestId, patch);
+    }
+});
+
+export const setBookingStatus = mutation({
+    args: {
+        token: v.string(),
+        requestId: v.id("bookingRequests"),
+        status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+    },
+    handler: async (ctx, args) => {
+        verifyToken(args.token);
+
+        const request = await ctx.db.get(args.requestId);
+        if (!request) throw new Error("Request not found");
+
+        const slotId = request.slotId as Id<"availableSlots">;
+
+        const slot = await ctx.db.get(slotId);
+        if (!slot || slot.isDeleted) throw new Error("Slot not found");
+
+        const currentStatus = request.status;
+        const nextStatus = args.status;
+
+        if (currentStatus === nextStatus) {
+            return;
+        }
+
+        if (currentStatus === "approved" && nextStatus !== "approved") {
+            await ctx.db.patch(slotId, {
+                isBooked: false,
+                bookedRequestId: undefined,
+            });
+        }
+
+        if (nextStatus === "approved") {
+            const latestSlot = await ctx.db.get(slotId);
+            if (!latestSlot || latestSlot.isDeleted) {
+                throw new Error("Slot not found");
+            }
+            if (latestSlot.isBooked && latestSlot.bookedRequestId !== args.requestId) {
+                throw new Error("This slot is already approved for another request");
+            }
+            await ctx.db.patch(slotId, {
+                isBooked: true,
+                bookedRequestId: args.requestId,
+            });
+        }
+
+        await ctx.db.patch(args.requestId, { status: nextStatus });
     }
 });
 

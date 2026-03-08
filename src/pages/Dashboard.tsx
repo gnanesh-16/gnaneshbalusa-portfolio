@@ -351,8 +351,8 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
     const bookingRequests = useQuery(api.portfolio.getBookingRequests, { token }) ?? [];
     const createSlot = useMutation(api.portfolio.createSlot);
     const deleteSlot = useMutation(api.portfolio.deleteSlot);
-    const approveBooking = useMutation(api.portfolio.approveBooking);
-    const rejectBooking = useMutation(api.portfolio.rejectBooking);
+    const bulkDeleteSlots = useMutation(api.portfolio.bulkDeleteSlots as any);
+    const setBookingStatus = useMutation(api.portfolio.setBookingStatus as any);
     const updateBooking = useMutation(api.portfolio.updateBooking);
 
     const today = new Date();
@@ -366,6 +366,7 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [newStart, setNewStart] = useState('10:00');
     const [newEnd, setNewEnd] = useState('10:30');
+    const [slotFrequency, setSlotFrequency] = useState(1);
     const [isCreating, setIsCreating] = useState(false);
 
     // Edit Request State
@@ -379,6 +380,36 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
         return `${y}-${mm}-${dd}`;
     };
 
+    const parseTimeToMinutes = (time: string) => {
+        const trimmed = time.trim();
+        const ampmMatch = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+        if (ampmMatch) {
+            let hours = Number(ampmMatch[1]);
+            const minutes = Number(ampmMatch[2]);
+            const period = ampmMatch[3].toUpperCase();
+            if (Number.isNaN(hours) || Number.isNaN(minutes)) return Number.MAX_SAFE_INTEGER;
+            if (period === 'AM' && hours === 12) hours = 0;
+            if (period === 'PM' && hours !== 12) hours += 12;
+            return hours * 60 + minutes;
+        }
+        const basicMatch = trimmed.match(/^(\d{1,2}):(\d{2})$/);
+        if (!basicMatch) return Number.MAX_SAFE_INTEGER;
+        const hours = Number(basicMatch[1]);
+        const minutes = Number(basicMatch[2]);
+        if (Number.isNaN(hours) || Number.isNaN(minutes)) return Number.MAX_SAFE_INTEGER;
+        return hours * 60 + minutes;
+    };
+
+    const formatTime12 = (time: string) => {
+        const mins = parseTimeToMinutes(time);
+        if (mins === Number.MAX_SAFE_INTEGER) return time;
+        const hours24 = Math.floor(mins / 60);
+        const minutes = mins % 60;
+        const period = hours24 >= 12 ? 'PM' : 'AM';
+        const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+        return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
+    };
+
     const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -388,26 +419,81 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
         return acc;
     }, {});
 
+    Object.keys(slotsByDate).forEach((dateKey) => {
+        slotsByDate[dateKey].sort((a, b) => parseTimeToMinutes(a.startTime) - parseTimeToMinutes(b.startTime));
+    });
+
     const firstDay = new Date(viewYear, viewMonth, 1).getDay();
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+    const todayIso = isoDate(today.getFullYear(), today.getMonth(), today.getDate());
+    const isRangeInvalid = !newStart || !newEnd || newEnd <= newStart;
 
     const handleCreateSlot = async (date: string) => {
-        if (!newStart || !newEnd || isCreating) return;
+        if (!newStart || !newEnd || isCreating || isRangeInvalid) return;
         setIsCreating(true);
-        await createSlot({ token, date, startTime: newStart, endTime: newEnd });
-        setIsCreating(false);
+        try {
+            await createSlot({ token, date, startTime: newStart, endTime: newEnd, frequencyMins: slotFrequency });
+        } catch (error) {
+            console.error(error);
+            alert(error instanceof Error ? error.message : 'Failed to add slots');
+        } finally {
+            setIsCreating(false);
+        }
     };
 
     const handleBulkCreate = async () => {
-        if (bulkSelectedDates.size === 0 || !newStart || !newEnd || isCreating) return;
+        if (bulkSelectedDates.size === 0 || !newStart || !newEnd || isCreating || isRangeInvalid) return;
         setIsCreating(true);
-        for (const date of Array.from(bulkSelectedDates)) {
-            await createSlot({ token, date, startTime: newStart, endTime: newEnd });
+        try {
+            for (const date of Array.from(bulkSelectedDates)) {
+                await createSlot({ token, date, startTime: newStart, endTime: newEnd, frequencyMins: slotFrequency });
+            }
+            setBulkSelectedDates(new Set());
+            setIsBulkMode(false);
+        } catch (error) {
+            console.error(error);
+            alert(error instanceof Error ? error.message : 'Failed to bulk add slots');
+        } finally {
+            setIsCreating(false);
         }
-        setBulkSelectedDates(new Set());
-        setIsBulkMode(false);
-        setIsCreating(false);
+    };
+
+    const handleBulkDelete = async () => {
+        if (bulkSelectedDates.size === 0 || isCreating) return;
+        setIsCreating(true);
+        try {
+            await bulkDeleteSlots({ token, dates: Array.from(bulkSelectedDates) });
+            setBulkSelectedDates(new Set());
+            setIsBulkMode(false);
+        } catch (error) {
+            console.error(error);
+            alert(error instanceof Error ? error.message : 'Failed to remove selected slots');
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    const handleClearAllOpenSlots = async () => {
+        if (isCreating) return;
+        setIsCreating(true);
+        try {
+            await bulkDeleteSlots({ token });
+            setBulkSelectedDates(new Set());
+            setIsBulkMode(false);
+            setSelectedDate(null);
+            setIsPanelOpen(false);
+            setNewStart('10:00');
+            setNewEnd('10:30');
+            setSlotFrequency(1);
+            setViewYear(today.getFullYear());
+            setViewMonth(today.getMonth());
+        } catch (error) {
+            console.error(error);
+            alert(error instanceof Error ? error.message : 'Failed to clear open slots');
+        } finally {
+            setIsCreating(false);
+        }
     };
 
     const startEdit = (req: any) => {
@@ -436,22 +522,31 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 h-full">
             {/* LEFT: Calendar Slot Manager */}
             <div className="xl:col-span-12 2xl:col-span-7 flex flex-col gap-6 ">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight">Manage Availability</h2>
                         <p className="text-[#86868B] text-sm mt-1">Calendar-based slot planning</p>
                     </div>
-                    <button
-                        onClick={() => { setIsBulkMode(!isBulkMode); setBulkSelectedDates(new Set()); }}
-                        className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${isBulkMode ? 'bg-blue-500 text-white shadow-lg' : 'bg-white dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] text-[#86868B]'}`}
-                    >
-                        {isBulkMode ? 'Cancel Bulk' : 'Bulk Add Slots'}
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            onClick={handleClearAllOpenSlots}
+                            disabled={isCreating}
+                            className="px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-red-500/10 text-red-500 hover:bg-red-500/15 disabled:opacity-40"
+                        >
+                            Clear All Open Slots
+                        </button>
+                        <button
+                            onClick={() => { setIsBulkMode(!isBulkMode); setBulkSelectedDates(new Set()); }}
+                            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${isBulkMode ? 'bg-blue-500 text-white shadow-lg' : 'bg-white dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] text-[#86868B]'}`}
+                        >
+                            {isBulkMode ? 'Cancel Bulk' : 'Bulk Select'}
+                        </button>
+                    </div>
                 </div>
 
-                <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl border border-[#D2D2D7] dark:border-[#38383A] p-6 shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl border border-[#D2D2D7] dark:border-[#38383A] p-6 shadow-sm">
                     {/* Month Nav */}
-                    <div className="flex items-center justify-between mb-8 px-2">
+                    <div className="flex items-center justify-between mb-4 px-2">
                         <div className="flex gap-4 items-center">
                             <h3 className="text-lg font-bold min-w-[140px]">{MONTHS[viewMonth]} {viewYear}</h3>
                             <div className="flex gap-1">
@@ -459,23 +554,41 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
                                     className="p-1.5 hover:bg-[#F5F5F7] dark:hover:bg-[#2C2C2E] rounded-lg text-[#86868B] transition-colors"><Icons.ArrowLeft className="w-5 h-5" /></button>
                                 <button onClick={() => { if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); } else setViewMonth(m => m + 1); }}
                                     className="p-1.5 hover:bg-[#F5F5F7] dark:hover:bg-[#2C2C2E] rounded-lg text-[#86868B] transition-colors"><Icons.ArrowRight className="w-5 h-5" /></button>
-                            </div>
-                        </div>
-                        {isBulkMode && (
-                            <div className="flex items-center gap-4 bg-[#F5F5F7] dark:bg-[#2C2C2E] px-4 py-2 rounded-2xl animate-in fade-in slide-in-from-right-4">
-                                <p className="text-xs font-medium">{bulkSelectedDates.size} selected</p>
-                                <div className="h-4 w-[1px] bg-[#D2D2D7] dark:border-[#38383A]" />
-                                <div className="flex gap-2 items-center">
-                                    <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)} className="bg-transparent text-xs border-none focus:ring-0 p-0 w-16" />
-                                    <span className="text-[#86868B] text-[10px]">to</span>
-                                    <input type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)} className="bg-transparent text-xs border-none focus:ring-0 p-0 w-16" />
-                                </div>
-                                <button onClick={handleBulkCreate} disabled={bulkSelectedDates.size === 0 || isCreating} className="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-blue-600 disabled:opacity-40 transition-all">
-                                    {isCreating ? 'Adding...' : 'Applied'}
+                                <button
+                                    onClick={() => { setViewYear(today.getFullYear()); setViewMonth(today.getMonth()); setSelectedDate(todayIso); }}
+                                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-[#F5F5F7] dark:bg-[#2C2C2E] text-[#86868B] hover:opacity-80 transition-all"
+                                >
+                                    Today
                                 </button>
                             </div>
-                        )}
+                        </div>
                     </div>
+
+                    {isBulkMode && (
+                        <div className="mb-6 p-4 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A] bg-[#F5F5F7] dark:bg-[#2C2C2E] animate-in fade-in slide-in-from-top-2">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <p className="text-xs font-semibold text-[#555] dark:text-[#c8c8cc]">{bulkSelectedDates.size} date(s) selected</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:w-auto">
+                                    <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)} className="bg-white dark:bg-[#1C1C1E] text-xs border border-[#D2D2D7] dark:border-[#38383A] rounded-lg px-2.5 py-2" />
+                                    <input type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)} className="bg-white dark:bg-[#1C1C1E] text-xs border border-[#D2D2D7] dark:border-[#38383A] rounded-lg px-2.5 py-2" />
+                                    <select value={slotFrequency} onChange={e => setSlotFrequency(Number(e.target.value))} className="bg-white dark:bg-[#1C1C1E] text-xs border border-[#D2D2D7] dark:border-[#38383A] rounded-lg px-2.5 py-2">
+                                        {[1, 2, 5, 10, 15, 30].map(freq => (
+                                            <option key={freq} value={freq}>{freq} min</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <button onClick={handleBulkCreate} disabled={bulkSelectedDates.size === 0 || isCreating || isRangeInvalid} className="bg-blue-500 text-white px-3 py-2 rounded-lg text-[11px] font-bold hover:bg-blue-600 disabled:opacity-40 transition-all">
+                                        {isCreating ? 'Adding…' : 'Add Slots'}
+                                    </button>
+                                    <button onClick={handleBulkDelete} disabled={bulkSelectedDates.size === 0 || isCreating} className="bg-red-500/10 text-red-500 px-3 py-2 rounded-lg text-[11px] font-bold hover:bg-red-500/20 disabled:opacity-40 transition-all">
+                                        Remove Selected
+                                    </button>
+                                </div>
+                            </div>
+                            {isRangeInvalid && <p className="text-[11px] text-red-500 font-semibold mt-2">End time must be greater than start time</p>}
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-7 gap-2">
                         {DAYS.map(d => <div key={d} className="text-center text-[10px] uppercase font-bold text-[#86868B] tracking-wider py-2">{d}</div>)}
@@ -486,6 +599,7 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
                             const isSelected = selectedDate === dStr;
                             const isBulkSelected = bulkSelectedDates.has(dStr);
                             const hasBooked = daySlots.some(s => s.isBooked);
+                            const isToday = dStr === todayIso;
 
                             return (
                                 <button
@@ -503,10 +617,14 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
                                     className={`aspect-square relative flex flex-col items-center justify-center rounded-2xl transition-all border
                                         ${isBulkSelected ? 'bg-blue-500/10 border-blue-500 dark:border-blue-400' :
                                             isSelected ? 'bg-black dark:bg-white text-white dark:text-black border-transparent shadow-lg scale-105' :
-                                                'bg-[#F5F5F7] dark:bg-[#2C2C2E] border-transparent hover:bg-[#EFEEF1] dark:hover:bg-[#38383A]'}
+                                                isToday ? 'bg-[#F5F5F7] dark:bg-[#2C2C2E] border-[#86868B]/60 hover:bg-[#EFEEF1] dark:hover:bg-[#38383A]' :
+                                                    'bg-[#F5F5F7] dark:bg-[#2C2C2E] border-transparent hover:bg-[#EFEEF1] dark:hover:bg-[#38383A]'}
                                     `}
                                 >
                                     <span className="text-sm font-semibold">{day}</span>
+                                    {isToday && !isSelected && (
+                                        <span className="text-[9px] mt-0.5 uppercase tracking-wider text-[#86868B] font-bold">Today</span>
+                                    )}
                                     {daySlots.length > 0 && (
                                         <div className="flex gap-0.5 mt-1">
                                             {daySlots.slice(0, 3).map((_, idx) => (
@@ -536,15 +654,36 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
                         </div>
 
                         {/* Add Slot */}
-                        <div className="flex items-center gap-3 mb-6 p-3 bg-[#F5F5F7] dark:bg-[#2C2C2E] rounded-2xl">
-                            <div className="flex-1 flex gap-2 items-center">
-                                <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)} className="bg-transparent text-sm border-none focus:ring-0 p-0 w-20 font-medium" />
-                                <span className="text-[#86868B] text-xs">to</span>
-                                <input type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)} className="bg-transparent text-sm border-none focus:ring-0 p-0 w-20 font-medium" />
+                        <div className="mb-6 p-4 bg-[#F5F5F7] dark:bg-[#2C2C2E] rounded-2xl border border-[#D2D2D7]/60 dark:border-[#38383A] space-y-3 sticky top-0 z-10">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] uppercase tracking-wider text-[#86868B] font-bold">Start</p>
+                                    <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)} className="w-full bg-white dark:bg-[#1C1C1E] text-sm border border-[#D2D2D7] dark:border-[#38383A] rounded-xl px-3 py-2.5 font-medium" />
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] uppercase tracking-wider text-[#86868B] font-bold">End</p>
+                                    <input type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)} className="w-full bg-white dark:bg-[#1C1C1E] text-sm border border-[#D2D2D7] dark:border-[#38383A] rounded-xl px-3 py-2.5 font-medium" />
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] uppercase tracking-wider text-[#86868B] font-bold">Frequency</p>
+                                    <select value={slotFrequency} onChange={e => setSlotFrequency(Number(e.target.value))} className="w-full bg-white dark:bg-[#1C1C1E] text-sm border border-[#D2D2D7] dark:border-[#38383A] rounded-xl px-3 py-2.5 font-medium">
+                                        {[1, 2, 5, 10, 15, 30].map(freq => (
+                                            <option key={freq} value={freq}>{freq} min</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
-                            <button onClick={() => handleCreateSlot(selectedDate)} disabled={isCreating} className="bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 rounded-xl text-xs font-bold hover:opacity-80 transition-all">
-                                {isCreating ? '...' : '+ Add'}
-                            </button>
+
+                            <div className="flex items-center justify-between gap-3">
+                                <p className="text-[11px] text-[#86868B]">Creates time slots between selected start and end.</p>
+                                <button onClick={() => handleCreateSlot(selectedDate)} disabled={isCreating || isRangeInvalid} className="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-xl text-xs font-bold hover:opacity-80 disabled:opacity-40 transition-all whitespace-nowrap">
+                                    {isCreating ? 'Adding…' : '+ Add Slots'}
+                                </button>
+                            </div>
+
+                            {isRangeInvalid && (
+                                <p className="text-[11px] text-red-500 font-semibold">End time must be greater than start time.</p>
+                            )}
                         </div>
 
                         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -552,7 +691,7 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
                                 <div key={slot._id} className="flex items-center justify-between p-3.5 rounded-2xl border border-[#D2D2D7] dark:border-[#38383A] bg-white dark:bg-[#1C1C1E]">
                                     <div className="flex items-center gap-3">
                                         <div className={`w-2 h-2 rounded-full ${slot.isBooked ? 'bg-green-500' : 'bg-blue-500'}`} />
-                                        <span className="text-sm font-medium">{slot.startTime} – {slot.endTime}</span>
+                                        <span className="text-sm font-medium">{formatTime12(slot.startTime)} – {formatTime12(slot.endTime)}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         {slot.isBooked && <span className="text-[10px] font-bold text-green-600 uppercase">Booked</span>}
@@ -598,7 +737,7 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
                                         <div className="flex items-center gap-2">
                                             <div className="flex-1 px-3 py-2 bg-[#F5F5F7] dark:bg-[#2C2C2E] rounded-xl flex items-center gap-2 text-xs font-medium">
                                                 <Icons.Briefcase className="w-3.5 h-3.5 text-[#86868B]" />
-                                                <span>{slot ? `${formatDate(slot.date)} · ${slot.startTime}` : 'Date/Time Unknown'}</span>
+                                                <span>{slot ? `${formatDate(slot.date)} · ${formatTime12(slot.startTime)}` : 'Date/Time Unknown'}</span>
                                             </div>
                                             <div className="px-3 py-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl text-[10px] font-black uppercase tracking-tight">
                                                 {req.meetType || 'Interview'}
@@ -623,28 +762,30 @@ const CalendlyView: React.FC<{ token: string }> = ({ token }) => {
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center justify-between gap-3">
-                                                    {(req.status === 'approved' || req.status === 'pending') && (
-                                                        <div className="flex items-center gap-2 text-[10px]">
-                                                            {req.gmeetLink ? (
-                                                                <button onClick={() => window.open(req.gmeetLink, '_blank')} className="text-blue-500 hover:underline flex items-center gap-1">
-                                                                    <Icons.Video className="w-3 h-3" /> GMeet Link Attached
-                                                                </button>
-                                                            ) : (
-                                                                <span className="text-[#86868B] italic">No meeting link yet</span>
-                                                            )}
-                                                            <button onClick={() => startEdit(req)} className="w-6 h-6 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg flex items-center justify-center text-[#86868B] transition-all"><Icons.PenTool className="w-3 h-3" /></button>
-                                                        </div>
-                                                    )}
-
-                                                    <div className="flex gap-2 ml-auto">
-                                                        {req.status === 'pending' && (
-                                                            <button onClick={() => approveBooking({ token, requestId: req._id })}
-                                                                className="px-4 py-1.5 rounded-xl bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase hover:opacity-80 transition-all">Approve</button>
+                                                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                                                    <div className="flex items-center gap-2 text-[10px] flex-wrap">
+                                                        {req.gmeetLink ? (
+                                                            <button onClick={() => window.open(req.gmeetLink, '_blank')} className="text-blue-500 hover:underline flex items-center gap-1">
+                                                                <Icons.Video className="w-3 h-3" /> GMeet Link Attached
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-[#86868B] italic">No meeting link yet</span>
                                                         )}
-                                                        {(req.status === 'pending' || req.status === 'approved') && (
-                                                            <button onClick={() => rejectBooking({ token, requestId: req._id })}
-                                                                className="px-4 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-[10px] font-black uppercase hover:bg-red-500/20 transition-all">Reject</button>
+                                                        <button onClick={() => startEdit(req)} className="w-6 h-6 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg flex items-center justify-center text-[#86868B] transition-all"><Icons.PenTool className="w-3 h-3" /></button>
+                                                    </div>
+
+                                                    <div className="flex flex-wrap gap-2 md:ml-auto">
+                                                        {req.status !== 'approved' && (
+                                                            <button onClick={() => setBookingStatus({ token, requestId: req._id, status: 'approved' })}
+                                                                className="px-3 py-1.5 rounded-xl bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase hover:opacity-80 transition-all">Approve</button>
+                                                        )}
+                                                        {req.status !== 'rejected' && (
+                                                            <button onClick={() => setBookingStatus({ token, requestId: req._id, status: 'rejected' })}
+                                                                className="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-[10px] font-black uppercase hover:bg-red-500/20 transition-all">Reject</button>
+                                                        )}
+                                                        {req.status !== 'pending' && (
+                                                            <button onClick={() => setBookingStatus({ token, requestId: req._id, status: 'pending' })}
+                                                                className="px-3 py-1.5 rounded-xl bg-blue-500/10 text-blue-500 text-[10px] font-black uppercase hover:bg-blue-500/20 transition-all">Move to Pending</button>
                                                         )}
                                                     </div>
                                                 </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
@@ -30,6 +30,177 @@ interface DesktopBookingPanelProps {
 const MEET_TYPES = ['Interview', 'Coffee Chat', 'Connect', 'General Meeting'] as const;
 type MeetType = typeof MEET_TYPES[number];
 
+const parseTimeToMinutes = (time: string) => {
+    const trimmed = time.trim();
+    const ampmMatch = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (ampmMatch) {
+        let hours = Number(ampmMatch[1]);
+        const minutes = Number(ampmMatch[2]);
+        const period = ampmMatch[3].toUpperCase();
+        if (Number.isNaN(hours) || Number.isNaN(minutes) || minutes < 0 || minutes > 59 || hours < 1 || hours > 12) {
+            return null;
+        }
+        if (period === 'AM' && hours === 12) hours = 0;
+        if (period === 'PM' && hours !== 12) hours += 12;
+        return hours * 60 + minutes;
+    }
+
+    const basicMatch = trimmed.match(/^(\d{1,2}):(\d{2})$/);
+    if (!basicMatch) return null;
+    const hours = Number(basicMatch[1]);
+    const minutes = Number(basicMatch[2]);
+    if (Number.isNaN(hours) || Number.isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+        return null;
+    }
+    return hours * 60 + minutes;
+};
+
+const formatMinutesTo12Hour = (totalMinutes: number) => {
+    const safe = ((totalMinutes % (24 * 60)) + (24 * 60)) % (24 * 60);
+    const hours24 = Math.floor(safe / 60);
+    const minutes = safe % 60;
+    const period = hours24 >= 12 ? 'PM' : 'AM';
+    const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+    return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
+};
+
+type SlotTimeOption = {
+    id: string;
+    slotId: Id<'availableSlots'>;
+    label: string;
+    sortValue: number;
+    isBooked: boolean;
+};
+
+const buildSlotTimeOptions = (slots: Array<{ _id: Id<'availableSlots'>; startTime: string; isBooked?: boolean }>): SlotTimeOption[] => {
+    const seen = new Set<number>();
+    const collected: SlotTimeOption[] = [];
+
+    for (const slot of slots) {
+        const mins = parseTimeToMinutes(slot.startTime);
+        if (mins === null || seen.has(mins)) continue;
+        seen.add(mins);
+        collected.push({
+            id: String(slot._id),
+            slotId: slot._id,
+            label: formatMinutesTo12Hour(mins),
+            sortValue: mins,
+            isBooked: slot.isBooked === true,
+        });
+    }
+
+    return collected.sort((a, b) => a.sortValue - b.sortValue);
+};
+
+const WHEEL_ITEM_HEIGHT = 44;
+
+const TimeWheelPicker: React.FC<{
+    options: SlotTimeOption[];
+    selectedId: string | null;
+    onChange: (id: string) => void;
+    showBookedCross?: boolean;
+}> = ({ options, selectedId, onChange, showBookedCross = false }) => {
+    const listRef = useRef<HTMLDivElement>(null);
+    const isUserScrollingRef = useRef(false);
+    const scrollStopTimeoutRef = useRef<number | null>(null);
+
+    const getIndexFromScrollTop = (scrollTop: number) => {
+        return Math.max(0, Math.min(options.length - 1, Math.round(scrollTop / WHEEL_ITEM_HEIGHT)));
+    };
+
+    const applySelectionFromScroll = (scrollTop: number) => {
+        if (!options.length) return;
+        const index = getIndexFromScrollTop(scrollTop);
+        const nextId = options[index]?.id;
+        if (nextId && nextId !== selectedId) {
+            onChange(nextId);
+        }
+    };
+
+    useEffect(() => {
+        if (!options.length || !selectedId || !listRef.current) return;
+        const index = options.findIndex(option => option.id === selectedId);
+        if (index < 0) return;
+        if (!isUserScrollingRef.current) {
+            listRef.current.scrollTo({ top: index * WHEEL_ITEM_HEIGHT, behavior: 'smooth' });
+        }
+    }, [selectedId, options]);
+
+    useEffect(() => {
+        return () => {
+            if (scrollStopTimeoutRef.current) {
+                window.clearTimeout(scrollStopTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleScroll = () => {
+        if (!listRef.current || options.length === 0) return;
+
+        isUserScrollingRef.current = true;
+        applySelectionFromScroll(listRef.current.scrollTop);
+
+        if (scrollStopTimeoutRef.current) {
+            window.clearTimeout(scrollStopTimeoutRef.current);
+        }
+        scrollStopTimeoutRef.current = window.setTimeout(() => {
+            if (!listRef.current) return;
+            const index = getIndexFromScrollTop(listRef.current.scrollTop);
+            listRef.current.scrollTo({ top: index * WHEEL_ITEM_HEIGHT, behavior: 'smooth' });
+            applySelectionFromScroll(index * WHEEL_ITEM_HEIGHT);
+            isUserScrollingRef.current = false;
+        }, 120);
+    };
+
+    const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+        event.stopPropagation();
+    };
+
+    if (options.length === 0) {
+        return <p className="text-white/30 text-sm text-center py-8">No slots available for this date.</p>;
+    }
+
+    return (
+        <div className="relative rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#0f0f10] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#0f0f10] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-x-4 top-1/2 -translate-y-1/2 h-11 rounded-xl border border-white/20 bg-white/5 z-10" />
+
+            <div
+                ref={listRef}
+                onScroll={handleScroll}
+                onWheel={handleWheel}
+                className="h-[220px] overflow-y-auto overscroll-contain snap-y snap-mandatory scrollbar-none"
+                style={{ scrollbarWidth: 'none' }}
+            >
+                <div style={{ height: `${WHEEL_ITEM_HEIGHT * 2}px` }} />
+                {options.map(option => (
+                    <button
+                        key={option.id}
+                        onClick={() => onChange(option.id)}
+                        title={option.isBooked ? 'Booked' : 'Available'}
+                        className={`w-full h-11 snap-center text-center text-lg tracking-wide transition-colors ${selectedId === option.id ? (option.isBooked ? 'text-red-300 font-semibold' : 'text-white font-semibold') : option.isBooked ? 'text-red-300/60' : 'text-white/45'}`}
+                    >
+                        <span>{option.label}</span>
+                        {option.isBooked && (
+                            <span className="ml-2 text-[10px] uppercase tracking-widest inline-flex items-center gap-1">
+                                {showBookedCross ? (
+                                    <>
+                                        <Icons.X className="w-3 h-3" /> Booked
+                                    </>
+                                ) : (
+                                    'Booked'
+                                )}
+                            </span>
+                        )}
+                    </button>
+                ))}
+                <div style={{ height: `${WHEEL_ITEM_HEIGHT * 2}px` }} />
+            </div>
+        </div>
+    );
+};
+
 const DesktopBookingPanel: React.FC<DesktopBookingPanelProps> = ({ onClose }) => {
     const today = new Date();
     const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -42,7 +213,6 @@ const DesktopBookingPanel: React.FC<DesktopBookingPanelProps> = ({ onClose }) =>
     const [note, setNote] = useState('');
     const [meetType, setMeetType] = useState<MeetType>('Interview');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [bookedSlotClicked, setBookedSlotClicked] = useState(false);
 
     // Fetch ALL slots (including booked) so we can show them greyed out
     const allSlots = useQuery(api.portfolio.getAvailableSlots) ?? [];
@@ -72,17 +242,11 @@ const DesktopBookingPanel: React.FC<DesktopBookingPanelProps> = ({ onClose }) =>
         const d = isoDate(viewYear, viewMonth, day);
         if (!slotsByDate[d]?.length) return;
         setSelectedDate(d);
-        setBookedSlotClicked(false);
         setStep('slots');
     };
 
-    const handleSlotPick = (id: Id<'availableSlots'>, isBooked: boolean) => {
-        if (isBooked) {
-            setBookedSlotClicked(true);
-            return;
-        }
+    const handleSlotPick = (id: Id<'availableSlots'>) => {
         setSelectedSlotId(id);
-        setBookedSlotClicked(false);
         setStep('confirm');
     };
 
@@ -101,7 +265,21 @@ const DesktopBookingPanel: React.FC<DesktopBookingPanelProps> = ({ onClose }) =>
     };
 
     const slotsForDate = selectedDate ? (slotsByDate[selectedDate] ?? []) : [];
+    const slotTimeOptions = useMemo(() => buildSlotTimeOptions(slotsForDate as any), [slotsForDate]);
+    const selectedTimeOptionId = selectedSlotId ? String(selectedSlotId) : null;
+    const selectedTimeOption = slotTimeOptions.find(option => option.id === selectedTimeOptionId) || null;
     const selectedSlot = allSlots.find(s => s._id === selectedSlotId);
+
+    useEffect(() => {
+        if (!slotTimeOptions.length) {
+            setSelectedSlotId(null);
+            return;
+        }
+        if (!selectedSlotId || !slotTimeOptions.some(option => option.slotId === selectedSlotId)) {
+            const firstOpen = slotTimeOptions.find(option => !option.isBooked);
+            setSelectedSlotId((firstOpen || slotTimeOptions[0]).slotId);
+        }
+    }, [slotTimeOptions, selectedSlotId]);
 
     // ── Success ──
     if (step === 'success') {
@@ -145,7 +323,7 @@ const DesktopBookingPanel: React.FC<DesktopBookingPanelProps> = ({ onClose }) =>
                     </div>
                     <div>
                         <p className="text-white text-sm font-semibold">{selectedDate && new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-                        <p className="text-white/40 text-xs">{selectedSlot.startTime} – {selectedSlot.endTime}</p>
+                        <p className="text-white/40 text-xs">{formatMinutesTo12Hour(parseTimeToMinutes(selectedSlot.startTime) ?? 0)}</p>
                     </div>
                 </div>
 
@@ -213,7 +391,7 @@ const DesktopBookingPanel: React.FC<DesktopBookingPanelProps> = ({ onClose }) =>
     if (step === 'slots') {
         return (
             <div className="flex flex-col gap-5 p-8 h-full overflow-y-auto">
-                <button onClick={() => { setStep('calendar'); setBookedSlotClicked(false); }} className="flex items-center gap-2 text-white/40 hover:text-white text-sm transition-colors w-fit">
+                <button onClick={() => { setStep('calendar'); setSelectedSlotId(null); }} className="flex items-center gap-2 text-white/40 hover:text-white text-sm transition-colors w-fit">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     Back
                 </button>
@@ -222,49 +400,33 @@ const DesktopBookingPanel: React.FC<DesktopBookingPanelProps> = ({ onClose }) =>
                     <h3 className="text-2xl font-bold text-white tracking-tight">
                         {selectedDate && new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                     </h3>
-                    <p className="text-white/35 text-sm mt-1">Pick a time that works for you</p>
+                    <p className="text-white/35 text-sm mt-1">Pick your time (Apple-style scroller)</p>
                 </div>
 
-                {/* Booked-slot message */}
-                {bookedSlotClicked && (
-                    <div className="rounded-2xl border border-white/10 px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                        <span className="text-lg">📅</span>
-                        <div>
-                            <p className="text-white text-sm font-semibold">Interview Scheduled</p>
-                            <p className="text-white/40 text-xs mt-0.5">This slot is already booked. Please choose another time.</p>
-                        </div>
-                    </div>
-                )}
+                <div className="flex flex-col gap-4">
+                    <TimeWheelPicker
+                        options={slotTimeOptions}
+                        selectedId={selectedTimeOptionId}
+                        showBookedCross={true}
+                        onChange={(id) => {
+                            const selectedOption = slotTimeOptions.find(option => option.id === id);
+                            if (selectedOption) {
+                                setSelectedSlotId(selectedOption.slotId);
+                            }
+                        }}
+                    />
 
-                <div className="flex flex-col gap-3">
-                    {slotsForDate.map(slot => {
-                        const isBooked = (slot as any).isBooked === true;
-                        return (
-                            <button
-                                key={slot._id}
-                                onClick={() => handleSlotPick(slot._id, isBooked)}
-                                className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl border transition-all text-left ${isBooked
-                                    ? 'border-white/5 cursor-not-allowed opacity-40'
-                                    : 'border-white/10 hover:border-white/25 active:scale-[0.98] cursor-pointer'
-                                    }`}
-                                style={{ background: 'rgba(255,255,255,0.05)' }}
-                            >
-                                <div>
-                                    <p className={`font-semibold text-sm ${isBooked ? 'text-white/50' : 'text-white'}`}>{slot.startTime} – {slot.endTime}</p>
-                                    <p className="text-white/35 text-xs mt-0.5">{isBooked ? 'Already booked' : '30 min · Video call'}</p>
-                                </div>
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center ${isBooked ? 'bg-white/5' : 'bg-white/10'}`}>
-                                    {isBooked
-                                        ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 17v-6M12 8h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                                        : <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                    }
-                                </div>
-                            </button>
-                        );
-                    })}
-                    {slotsForDate.length === 0 && (
-                        <p className="text-white/30 text-sm text-center py-8">No slots available for this date.</p>
+                    {selectedTimeOption?.isBooked && (
+                        <p className="text-red-300 text-xs inline-flex items-center gap-1"><Icons.X className="w-3 h-3" /> This time is booked (approved). Pick another slot.</p>
                     )}
+
+                    <button
+                        onClick={() => selectedSlotId && handleSlotPick(selectedSlotId)}
+                        disabled={!selectedSlotId || !!selectedTimeOption?.isBooked}
+                        className="w-full py-3.5 rounded-2xl bg-white text-black text-sm font-semibold disabled:opacity-30 hover:bg-white/90 transition-all active:scale-[0.99]"
+                    >
+                        {selectedTimeOption?.isBooked ? 'Selected time is booked' : 'Continue with selected time'}
+                    </button>
                 </div>
             </div>
         );
@@ -600,13 +762,29 @@ const MobileBookingFlow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         return acc;
     }, {});
 
+    const slotsForSelectedDate = selectedDate ? (slotsByDate[selectedDate] ?? []) : [];
+    const slotTimeOptions = useMemo(() => buildSlotTimeOptions(slotsForSelectedDate as any), [slotsForSelectedDate]);
+    const selectedTimeOptionId = selectedSlotId ? String(selectedSlotId) : null;
+    const selectedTimeOption = slotTimeOptions.find(option => option.id === selectedTimeOptionId) || null;
+
+    useEffect(() => {
+        if (!slotTimeOptions.length) {
+            setSelectedSlotId(null);
+            return;
+        }
+        if (!selectedSlotId || !slotTimeOptions.some(option => option.slotId === selectedSlotId)) {
+            const firstOpen = slotTimeOptions.find(option => !option.isBooked);
+            setSelectedSlotId((firstOpen || slotTimeOptions[0]).slotId);
+        }
+    }, [slotTimeOptions, selectedSlotId]);
+
     const firstDay = new Date(viewYear, viewMonth, 1).getDay();
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
 
     const handleDayClick = (day: number) => {
         const d = isoDate(viewYear, viewMonth, day);
-        if (!slotsByDate[d]?.some(s => !(s as any).isBooked)) return;
+        if (!slotsByDate[d]?.length) return;
         setSelectedDate(d);
         setStep('slots');
     };
@@ -650,7 +828,7 @@ const MobileBookingFlow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <h3 className="text-xl font-bold text-white">{selectedDate && formatDate(selectedDate)}</h3>
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col gap-1">
                     <p className="text-white text-sm font-bold">{selectedDate && formatDate(selectedDate)}</p>
-                    <p className="text-white/40 text-xs">{allSlots.find(s => s._id === selectedSlotId)?.startTime} (30 min)</p>
+                    <p className="text-white/40 text-xs">{formatMinutesTo12Hour(parseTimeToMinutes(allSlots.find(s => s._id === selectedSlotId)?.startTime || '00:00') ?? 0)}</p>
                 </div>
                 <div className="flex flex-col gap-3">
                     <select value={meetType} onChange={e => setMeetType(e.target.value as MeetType)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none">
@@ -674,26 +852,33 @@ const MobileBookingFlow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
 
     if (step === 'slots') {
-        const slots = selectedDate ? slotsByDate[selectedDate] || [] : [];
         return (
             <div className="flex flex-col gap-5">
                 <button onClick={() => setStep('calendar')} className="text-white/40 text-xs font-bold uppercase tracking-wider flex items-center gap-1">← Back to days</button>
                 <h3 className="text-xl font-bold text-white">{selectedDate && formatDate(selectedDate)}</h3>
-                <div className="grid grid-cols-1 gap-2">
-                    {slots.map(s => {
-                        const isBooked = (s as any).isBooked;
-                        return (
-                            <button
-                                key={s._id}
-                                disabled={isBooked}
-                                onClick={() => handleSlotPick(s._id)}
-                                className={`flex justify-between items-center p-4 rounded-xl border transition-all ${isBooked ? 'opacity-20 border-white/5' : 'bg-white/5 border-white/10 active:scale-95'}`}
-                            >
-                                <span className="text-white font-bold">{s.startTime}</span>
-                                <span className="text-white/40 text-xs">{isBooked ? 'Booked' : '30 min'}</span>
-                            </button>
-                        );
-                    })}
+                <div className="flex flex-col gap-4">
+                    <TimeWheelPicker
+                        options={slotTimeOptions}
+                        selectedId={selectedTimeOptionId}
+                        onChange={(id) => {
+                            const selectedOption = slotTimeOptions.find(option => option.id === id);
+                            if (selectedOption) {
+                                setSelectedSlotId(selectedOption.slotId);
+                            }
+                        }}
+                    />
+
+                    {selectedTimeOption?.isBooked && (
+                        <p className="text-red-300 text-xs">This time is already booked. Pick another slot.</p>
+                    )}
+
+                    <button
+                        onClick={() => selectedSlotId && handleSlotPick(selectedSlotId)}
+                        disabled={!selectedSlotId || !!selectedTimeOption?.isBooked}
+                        className="w-full py-4 rounded-2xl bg-blue-500 text-white font-bold shadow-[0_4px_15px_rgba(59,130,246,0.3)] disabled:opacity-30"
+                    >
+                        {selectedTimeOption?.isBooked ? 'Selected time is booked' : 'Continue with selected time'}
+                    </button>
                 </div>
             </div>
         );

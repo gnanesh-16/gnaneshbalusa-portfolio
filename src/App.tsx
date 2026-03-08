@@ -19,7 +19,19 @@ import { Analytics } from '@vercel/analytics/react';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
+let convex: ConvexReactClient | null = null;
+let convexInitError: string | null = null;
+
+if (!convexUrl) {
+    convexInitError = 'Missing VITE_CONVEX_URL environment variable.';
+} else {
+    try {
+        convex = new ConvexReactClient(convexUrl);
+    } catch (error) {
+        convexInitError = error instanceof Error ? error.message : 'Failed to initialize Convex client.';
+    }
+}
 
 const SECTION_TITLES: Record<string, string> = {
     hero: 'Portfolio',
@@ -126,6 +138,20 @@ const MainPortfolio: React.FC = () => {
 import { Connects } from './pages/Connects';
 
 const App: React.FC = () => {
+    if (!convex) {
+        return (
+            <ThemeProvider>
+                <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#131313] text-[#1a1a1a] dark:text-white font-[Manrope] transition-colors duration-300 flex items-center justify-center p-6">
+                    <div className="max-w-xl w-full border border-[#e5e5e5] dark:border-zinc-800 rounded-xl p-6 bg-white/80 dark:bg-zinc-900/40">
+                        <h1 className="text-2xl font-bold mb-3">App configuration required</h1>
+                        <p className="text-sm mb-2">Set <strong>VITE_CONVEX_URL</strong> in your <strong>.env.local</strong> file, then restart Vite.</p>
+                        <p className="text-xs opacity-80">{convexInitError}</p>
+                    </div>
+                </div>
+            </ThemeProvider>
+        );
+    }
+
     return (
         <ConvexProvider client={convex}>
             <ThemeProvider>
