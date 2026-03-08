@@ -94,6 +94,10 @@ const MainPortfolio: React.FC = () => {
 
     useActiveSectionTitle(isResumeOpen);
 
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'auto' });
+    }, []);
+
     const handleAboutClick = () => {
         setShowAboutDesktop(true);
     };

@@ -25,7 +25,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onAboutClick, onResume
     };
 
     return (
-        <section id="hero" className="hidden md:grid px-6 pt-32 pb-32 max-w-[1200px] mx-auto grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <section id="hero" className="hidden md:grid px-6 max-w-[1200px] mx-auto grid-cols-1 md:grid-cols-2 gap-12 items-center min-h-[calc(100vh-64px)] py-10">
             <div className="space-y-8">
                 {/* Headline */}
                 <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-[#1a1a1a] dark:text-[#f0f0f0] leading-[1.05]">
